@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody2D rb;
-    private TrailRenderer trailRenderer;
+
 
 
     // Start is called before the first frame update
@@ -14,9 +15,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // Get the components attached to the GameObject
         rb = GetComponent<Rigidbody2D>();
-        //animator = GetComponent<Animator>();
 
-        trailRenderer = GetComponentInChildren<TrailRenderer>();
     }
     private void Start()
     {
@@ -37,25 +36,9 @@ public class PlayerMovement : MonoBehaviour
         Jumping();
         Walking();
         Dashing();
+        Flying();
     }
 
-
-    // bool isKnockbacked = false;
-
-    // public IEnumerator Knockback(Vector3 direction, Vector2 force, float duration)
-    // {
-    //     playerCombat.isAttacking = false;
-    //     isKnockbacked = true;
-    //     float timer = 0;
-    //     while (duration > timer)
-    //     {
-    //         timer += Time.deltaTime;
-    //         rb.velocity = new Vector2(-transform.localScale.x * force.x, force.y);
-    //         yield return null;
-    //     }
-    //     isKnockbacked = false;
-
-    // }
 
     #region Ground Check
 
@@ -83,15 +66,17 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement Speeds")]
     [SerializeField] private float _moveSpeed = 10; // Speed of regular walking
     [SerializeField] private float _sprintSpeed = 13; // Speed of sprinting
-//    [SerializeField] AudioClip[] stepSounds;
+
     private float horizontal; // Horizontal input from player
 
     private bool facingRight = true; // Flag indicating if the player is facing right
+
     // Handle player walking
     private void Walking()
     {
         horizontal = Input.GetAxisRaw("Horizontal");
 
+    
         // Adjust velocity based on sprint input
         if (Input.GetButton("Sprint"))
         {
@@ -113,10 +98,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void PlayFootstepSound()
-    {
-        //SoundFXManager.Instance.PlayRandomSoundFXClip(stepSounds, transform, 0.5f);
-    }
     private void FlipSprite()
     {
         facingRight = !facingRight;
@@ -131,13 +112,12 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Jump Settings")]
     [SerializeField] private bool _playerCanDoubleJump = true; // Flag indicating if the player can jump
-    [SerializeField] private bool _fixedJumpHeight = false; // Flag indicating if the player can jump
     [SerializeField] private float _coyoteTime = 0.2f; // Duration of grace period for jumping after leaving ground
     [SerializeField] private float _jumpBufferTime = 0.1f; // Duration of buffer time for jumping
     [SerializeField] private float _jumpSpeed = 12; // Height of the jump
     [SerializeField] private float _fallSpeed = 7; // Speed of falling
     [SerializeField] private float _jumpVelocityFalloff = 8; // Rate of decrease in jump velocity
-//    [SerializeField] AudioClip[] _jumpSounds;
+
 
     private int numberOfJumps = 1; // Number of jumps the player can perform
     private int jumpsRemaining; // Number of jumps remaining
@@ -150,6 +130,7 @@ public class PlayerMovement : MonoBehaviour
     // Handle player jumping
     private void Jumping()
     {
+        
         // Reset coyote time counter if the player is grounded
         if (isGrounded)
         {
@@ -173,10 +154,9 @@ public class PlayerMovement : MonoBehaviour
         if (jumpBufferCounter > 0 && coyoteTimeCounter > 0 && hasJumped == false)
         {
             rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
-            //PlayParticleEffectInstance(_groundCheck.position, _jumpParticles);
+
             hasJumped = true;
             hasLanded = false;
-            PlayJumpSound();
         }
 
         if (isGrounded && rb.velocity.y < 0)
@@ -185,8 +165,6 @@ public class PlayerMovement : MonoBehaviour
             if (!hasLanded)
             {
                 hasLanded = true;
-                PlayFootstepSound();
-                //PlayParticleEffectInstance(_groundCheck.position, _jumpParticles);
             }
         }
 
@@ -196,15 +174,7 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimeCounter = 0; // Reset coyote time counter if the player releases the jump button to stop accidental double jumps
         }
 
-        if (_fixedJumpHeight)
-        {
-            // Apply gravity and falloff to jump velocity
-            if (rb.velocity.y < _jumpVelocityFalloff || rb.velocity.y > 0)
-            {
-                rb.velocity += Vector2.up * (_fallSpeed * Physics.gravity.y * Time.deltaTime); //FIXED JUMP HEIGHT - gravity is applied to the jump velocity
 
-            }
-        }
         else
         {
             // Apply gravity and falloff to jump velocity
@@ -223,16 +193,11 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetButtonDown("Jump") && coyoteTimeCounter < 0 && jumpsRemaining > 0 && !isWallSliding)
         {
             rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
-            PlayJumpSound();
             jumpsRemaining--;
         }
 
     }
 
-    private void PlayJumpSound()
-    {
-        //SoundFXManager.Instance.PlayRandomSoundFXClip(_jumpSounds, transform, 0.5f);
-    }
     #endregion
 
     #region Wall Jumping
@@ -250,7 +215,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _wallJumpingTime = 0.2f;
     [SerializeField] private float _wallJumpingDuration = 0.2f;
     [SerializeField] private Vector2 _wallJumpingPower = new Vector2(8f, 16f);
-    //[SerializeField] private AudioClip[] _wallJumpSounds;
+
     private bool isWallJumping; // Flag indicating if the player is wall jumping
     private float wallJumpingDir;
     private float wallJumpingCounter;
@@ -299,7 +264,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetButtonDown("Jump") && wallJumpingCounter > 0)
         {
-            //StopParticleEffect(_wallSlideParticles);
             isWallJumping = true;
             rb.velocity = new Vector2(wallJumpingDir * _wallJumpingPower.x, _wallJumpingPower.y);
             wallJumpingCounter = 0;
@@ -321,7 +285,7 @@ public class PlayerMovement : MonoBehaviour
     #region Dashing
 
     [Header("Dash Settings")]
-    [SerializeField] private bool _playerCanDash = true; // Flag indicating if the player can dash
+    [SerializeField] private bool _playerHasDashAbility = true; // Flag indicating if the player can dash
     [SerializeField] private float _dashPower = 24f; // Power/speed of the dash
     [SerializeField] private float _dashDuration = 0.2f; // How long the dash lasts
     [SerializeField] private float _dashCooldown = 1f; // Cooldown time between dashes
@@ -331,7 +295,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Dashing()
     {
-        if (!_playerCanDash) return;
+        if (!_playerHasDashAbility) return;
+
         // If the player presses the dash button and can dash, start the dash coroutine
         if (Input.GetButtonDown("Dash") && canDash)
         {
@@ -353,11 +318,33 @@ public class PlayerMovement : MonoBehaviour
 
         rb.gravityScale = originalGravity; // Reset the gravity scale
         isDashing = false;
-        
+
         yield return new WaitForSeconds(_dashCooldown); // Wait for the dash cooldown to end
         canDash = true; // Allow the player to dash again
     }
     #endregion
 
+    #region Flying
+    [Header("Flying Settings")]
 
+    [SerializeField] float _flyingSpeed = 14;
+    [SerializeField] float _flyingStamina = 100;
+    [SerializeField] float _staminaDrainPerSecond = 20;
+    [SerializeField] float _staminaRecoveryPerSecond = 40;
+    
+    public bool canFly;
+
+
+    void Flying(){
+        if(isGrounded) return;
+        if(isTouchingWall) return;
+        if(!canFly) return;
+        if(!Input.GetButton("Jump")) return;
+
+        rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed);
+
+    } 
+
+
+    #endregion
 }
