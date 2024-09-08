@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -19,7 +21,9 @@ public class PlayerMovement : MonoBehaviour
     }
     private void Start()
     {
-
+        originalGravityScale = rb.gravityScale;
+        staminaBarParent = _staminaBar.transform.parent.gameObject;
+        currentStamina = _maxFlyingStamina;
     }
     // Update is called once per frame
     private void Update()
@@ -68,14 +72,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _sprintSpeed = 13; // Speed of sprinting
 
     private float horizontal; // Horizontal input from player
-
+    private float vertical; // vertical input from player
     private bool facingRight = true; // Flag indicating if the player is facing right
 
     // Handle player walking
     private void Walking()
     {
         horizontal = Input.GetAxisRaw("Horizontal");
-
+        vertical = Input.GetAxisRaw("Vertical");
     
         // Adjust velocity based on sprint input
         if (Input.GetButton("Sprint"))
@@ -130,7 +134,7 @@ public class PlayerMovement : MonoBehaviour
     // Handle player jumping
     private void Jumping()
     {
-        
+
         // Reset coyote time counter if the player is grounded
         if (isGrounded)
         {
@@ -174,9 +178,8 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimeCounter = 0; // Reset coyote time counter if the player releases the jump button to stop accidental double jumps
         }
 
+        if(!isWallGrabbing){
 
-        else
-        {
             // Apply gravity and falloff to jump velocity
             if (rb.velocity.y < _jumpVelocityFalloff || rb.velocity.y > 0 && !Input.GetButton("Jump"))
             {
@@ -184,6 +187,7 @@ public class PlayerMovement : MonoBehaviour
 
             }
         }
+
 
 
 
@@ -207,9 +211,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform _wallCheck; // The transform representing the position to check for walls
     private bool isTouchingWall; // Flag indicating if the player is touching a wall
 
-    [Header("Wall Slide Settings")]
+    [Header("Wall Movement Settings")]
     [SerializeField] private float _wallSlideSpeed = 2f; // Speed of sliding down a wall
     private bool isWallSliding; // Flag indicating if the player is sliding down a wall
+    private bool isWallClimbing; // Flag indicating if the player is climbing up a wall
+    private bool isWallGrabbing; // Flag indicating if the player is holding onto a wall
 
     [Header("Wall Jump Settings")]
     [SerializeField] private float _wallJumpingTime = 0.2f;
@@ -226,29 +232,48 @@ public class PlayerMovement : MonoBehaviour
 
         isTouchingWall = Physics2D.OverlapCircle(_wallCheck.position, _groundCheckRadius, _wallMask);
 
+        WallGrab();
 
-        WallSlide();
+        WallMovement();
 
         WallJump();
     }
-
-    private void WallSlide()
-    {
-        // If the player is touching a wall and not grounded and moving horizontally into the wall, slide down the wall
-        if (isTouchingWall && !isGrounded && horizontal != 0)
+    private void WallGrab(){
+               
+        if (isTouchingWall && !isGrounded && horizontal != 0 && vertical == 0)  // If the player is touching a wall and not grounded and moving horizontally into the wall, hold the wall
         {
-            rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -_wallSlideSpeed, float.MaxValue));
+            rb.velocity = new Vector2(rb.velocity.x, 0);
+            rb.gravityScale = 0;
+            isWallGrabbing = true;
+            TurnOnStaminaBar();
+        } else if(!isTouchingWall){
+            rb.gravityScale = originalGravityScale;
+            isWallGrabbing = false;
+        }
+    }
+    private void WallMovement()
+    {
+        
+        // If the player is touching a wall and not grounded and moving horizontally into the wall, slide down the wall
+        if (vertical < 0 && isWallGrabbing)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, -_wallSlideSpeed);
+            DrainStamina();
+            isWallClimbing = false;
             isWallSliding = true;
         }
-        else
+        else if(vertical > 0 && isWallGrabbing)
         {
+            DrainStamina();
+            rb.velocity = new Vector2(rb.velocity.x, _wallSlideSpeed);
+            isWallClimbing = true;
             isWallSliding = false;
-        }
+        } 
     }
 
     private void WallJump()
     {
-        if (isWallSliding)
+        if (isWallGrabbing)
         {
             isWallJumping = false;
 
@@ -290,6 +315,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _dashDuration = 0.2f; // How long the dash lasts
     [SerializeField] private float _dashCooldown = 1f; // Cooldown time between dashes
 
+    private float originalGravityScale;
     private bool canDash = true; // Flag indicating if the player can dash
     public bool isDashing = false; // Flag indicating if the player is in the middle of dashing
 
@@ -309,14 +335,14 @@ public class PlayerMovement : MonoBehaviour
 
         canDash = false; // Prevent the player from dashing again until the cooldown is over - is set to true in the grounded function
         isDashing = true; // Sets flag that the player is currently dashing
-        float originalGravity = rb.gravityScale; // Store the original gravity scale of the player
+        
         rb.gravityScale = 0; // Set gravity to 0 so the player doesn't fall during the dash
         rb.velocity = new Vector2(transform.localScale.x * _dashPower, 0f); // Apply the dash power to the player
 
 
         yield return new WaitForSeconds(_dashDuration); // Wait for the dash duration to end
 
-        rb.gravityScale = originalGravity; // Reset the gravity scale
+        rb.gravityScale = originalGravityScale; // Reset the gravity scale
         isDashing = false;
 
         yield return new WaitForSeconds(_dashCooldown); // Wait for the dash cooldown to end
@@ -328,23 +354,75 @@ public class PlayerMovement : MonoBehaviour
     [Header("Flying Settings")]
 
     [SerializeField] float _flyingSpeed = 14;
-    [SerializeField] float _flyingStamina = 100;
-    [SerializeField] float _staminaDrainPerSecond = 20;
+    [SerializeField] float _maxFlyingStamina = 100;
+    [SerializeField] float _staminaDrainPerSecondFlying = 20;
     [SerializeField] float _staminaRecoveryPerSecond = 40;
-    
+    [SerializeField] Image _staminaBar; 
+
+    float currentStamina;
+    private GameObject staminaBarParent;
     public bool canFly;
 
-
     void Flying(){
-        if(isGrounded) return;
-        if(isTouchingWall) return;
-        if(!canFly) return;
-        if(!Input.GetButton("Jump")) return;
+        if(isGrounded){ // if grounded then restore stamina until jump
+            RestoreStamina();
+            return;
+        }
+        if(!canFly) return; // if cant fly eg. no stamina/player is in the storm return
+        if(!Input.GetButton("Jump")) return; // if not holding the fly button return
+        if(currentStamina <= 0) {
+            canFly = false;
+            return; // player is out of stamina
+        }
+        
+        
+        rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed); //add velocity for flying
 
-        rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed);
+        TurnOnStaminaBar(); // make stamina bar visible
 
+        DrainStamina();
     } 
 
+    void RestoreStamina(){
+            if(currentStamina == _maxFlyingStamina) {
+                canFly = true;
+                return;
+            }
 
+
+            float restoreAmount = _staminaRecoveryPerSecond/(1/Time.deltaTime);
+
+            currentStamina += restoreAmount;
+
+
+            if(currentStamina > _maxFlyingStamina){
+                currentStamina = _maxFlyingStamina;
+                Invoke("TurnOffStaminaBar",1); //turns stamina bar off after 1 second
+            } 
+
+            UpdateStaminaBar();
+    }
+    void DrainStamina(){
+        float drainAmount = _staminaDrainPerSecondFlying/(1/Time.deltaTime);
+
+        currentStamina -= drainAmount;
+        
+        UpdateStaminaBar();
+
+    }
+    void UpdateStaminaBar(){
+        _staminaBar.fillAmount = currentStamina / _maxFlyingStamina;    
+    }
+
+    void TurnOffStaminaBar() {
+        if(staminaBarParent.activeSelf == false) return;
+
+        staminaBarParent.gameObject.SetActive(false);
+    }
+    void TurnOnStaminaBar() {
+        if(staminaBarParent.activeSelf == true) return;
+
+        staminaBarParent.gameObject.SetActive(true);
+    }
     #endregion
 }
