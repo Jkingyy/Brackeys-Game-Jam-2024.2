@@ -1876,10 +1876,10 @@ MonoBehaviour:
   isDashing: 0
   _flyingSpeed: 10
   _maxFlyingStamina: 100
-  _staminaDrain: 20
-  _staminaRecovery: 40
+  _staminaDrainPerSecond: 20
+  _staminaRecoveryPerSecond: 40
   _staminaBar: {fileID: 315252109}
-  canFly: 1
+  canFly: 0
 --- !u!50 &1758461475
 Rigidbody2D:
   serializedVersion: 4
