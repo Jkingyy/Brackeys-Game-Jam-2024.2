@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -19,7 +20,8 @@ public class PlayerMovement : MonoBehaviour
     }
     private void Start()
     {
-
+        staminaBarParent = _staminaBar.transform.parent.gameObject;
+        currentStamina = _maxFlyingStamina;
     }
     // Update is called once per frame
     private void Update()
@@ -130,7 +132,7 @@ public class PlayerMovement : MonoBehaviour
     // Handle player jumping
     private void Jumping()
     {
-        
+
         // Reset coyote time counter if the player is grounded
         if (isGrounded)
         {
@@ -234,6 +236,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallSlide()
     {
+        if(canFly) return;
         // If the player is touching a wall and not grounded and moving horizontally into the wall, slide down the wall
         if (isTouchingWall && !isGrounded && horizontal != 0)
         {
@@ -328,23 +331,72 @@ public class PlayerMovement : MonoBehaviour
     [Header("Flying Settings")]
 
     [SerializeField] float _flyingSpeed = 14;
-    [SerializeField] float _flyingStamina = 100;
+    [SerializeField] float _maxFlyingStamina = 100;
     [SerializeField] float _staminaDrainPerSecond = 20;
     [SerializeField] float _staminaRecoveryPerSecond = 40;
-    
+    [SerializeField] Image _staminaBar; 
+
+    float currentStamina;
+    private GameObject staminaBarParent;
     public bool canFly;
 
-
     void Flying(){
-        if(isGrounded) return;
-        if(isTouchingWall) return;
-        if(!canFly) return;
-        if(!Input.GetButton("Jump")) return;
+        if(isGrounded){ // if grounded then restore stamina until jump
+            RestoreStamina();
+            return;
+        }
+        if(!canFly) return; // if cant fly eg. no stamina/player is in the storm return
+        if(!Input.GetButton("Jump")) return; // if not holding the fly button return
+        if(currentStamina <= 0) {
+            canFly = false;
+            return; // player is out of stamina
+        }
+        
+        
+        rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed); //add velocity for flying
 
-        rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed);
+        TurnOnStaminaBar(); // make stamina bar visible
+        
+        float drainAmount = _staminaDrainPerSecond/(1/Time.deltaTime);
+
+        currentStamina -= drainAmount;
+        
+        UpdateStaminaBar();
 
     } 
 
+    void RestoreStamina(){
+            if(currentStamina == _maxFlyingStamina) {
+                canFly = true;
+                return;
+            }
 
+
+            float restoreAmount = _staminaRecoveryPerSecond/(1/Time.deltaTime);
+
+            currentStamina += restoreAmount;
+
+
+            if(currentStamina > _maxFlyingStamina){
+                currentStamina = _maxFlyingStamina;
+                Invoke("TurnOffStaminaBar",1); //turns stamina bar off after 1 second
+            } 
+
+            UpdateStaminaBar();
+    }
+    void UpdateStaminaBar(){
+        _staminaBar.fillAmount = currentStamina / _maxFlyingStamina;    
+    }
+
+    void TurnOffStaminaBar() {
+        if(staminaBarParent.activeSelf == false) return;
+
+        staminaBarParent.gameObject.SetActive(false);
+    }
+    void TurnOnStaminaBar() {
+        if(staminaBarParent.activeSelf == true) return;
+
+        staminaBarParent.gameObject.SetActive(true);
+    }
     #endregion
 }
