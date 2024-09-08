@@ -1870,13 +1870,13 @@ MonoBehaviour:
   _wallJumpingDuration: 0.2
   _wallJumpingPower: {x: 8, y: 16}
   _playerHasDashAbility: 1
-  _dashPower: 24
+  _dashPower: 45
   _dashDuration: 0.2
   _dashCooldown: 1
   isDashing: 0
   _flyingSpeed: 10
   _maxFlyingStamina: 100
-  _staminaDrainPerSecond: 20
+  _staminaDrainPerSecondFlying: 20
   _staminaRecoveryPerSecond: 40
   _staminaBar: {fileID: 315252109}
   canFly: 0
