@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -10,7 +11,7 @@ public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody2D rb;
 
-
+    [SerializeField] GameObject _playerGraphics;
 
     // Start is called before the first frame update
     private void Awake()
@@ -239,7 +240,7 @@ public class PlayerMovement : MonoBehaviour
         WallJump();
     }
     private void WallGrab(){
-               
+        if(currentStamina <= 0) return;
         if (isTouchingWall && !isGrounded && horizontal != 0 && vertical == 0)  // If the player is touching a wall and not grounded and moving horizontally into the wall, hold the wall
         {
             rb.velocity = new Vector2(rb.velocity.x, 0);
@@ -362,10 +363,17 @@ public class PlayerMovement : MonoBehaviour
     float currentStamina;
     private GameObject staminaBarParent;
     public bool canFly;
+    private bool isFlying;
 
     void Flying(){
+        isFlying = false;
+        
+        if(isGrounded || isTouchingWall){
+            _playerGraphics.transform.rotation = Quaternion.Euler(0,0,0);
+        }
         if(isGrounded){ // if grounded then restore stamina until jump
             RestoreStamina();
+            
             return;
         }
         if(!canFly) return; // if cant fly eg. no stamina/player is in the storm return
@@ -377,10 +385,18 @@ public class PlayerMovement : MonoBehaviour
         
         
         rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed); //add velocity for flying
-
+        isFlying = true;
+        float rotation;
+        if(facingRight){
+            rotation = -90;
+            
+        } else {
+            rotation = 90;
+        }
+        _playerGraphics.transform.rotation = Quaternion.Euler(0,0,rotation);
         TurnOnStaminaBar(); // make stamina bar visible
 
-        DrainStamina();
+        DrainStamina();  
     } 
 
     void RestoreStamina(){
