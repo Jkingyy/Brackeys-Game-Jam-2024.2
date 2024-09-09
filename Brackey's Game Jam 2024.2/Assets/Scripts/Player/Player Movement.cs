@@ -247,7 +247,7 @@ public class PlayerMovement : MonoBehaviour
             rb.gravityScale = 0;
             isWallGrabbing = true;
             TurnOnStaminaBar();
-        } else if(!isTouchingWall){
+        } else if(!isTouchingWall || horizontal == 0){
             rb.gravityScale = originalGravityScale;
             isWallGrabbing = false;
         }
@@ -386,6 +386,7 @@ public class PlayerMovement : MonoBehaviour
         
         rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed); //add velocity for flying
         isFlying = true;
+        
         float rotation;
         if(facingRight){
             rotation = -90;
