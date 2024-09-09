@@ -237,17 +237,17 @@ public class PlayerMovement : MonoBehaviour
 
         WallMovement();
 
-        WallJump();
+        //WallJump();
     }
     private void WallGrab(){
-        if(currentStamina <= 0) return;
+
         if (isTouchingWall && !isGrounded && horizontal != 0 && vertical == 0)  // If the player is touching a wall and not grounded and moving horizontally into the wall, hold the wall
         {
             rb.velocity = new Vector2(rb.velocity.x, 0);
             rb.gravityScale = 0;
             isWallGrabbing = true;
             TurnOnStaminaBar();
-        } else if(!isTouchingWall || horizontal == 0){
+        } else if(!isTouchingWall || horizontal == 0 || currentStamina <= 0){
             rb.gravityScale = originalGravityScale;
             isWallGrabbing = false;
         }
