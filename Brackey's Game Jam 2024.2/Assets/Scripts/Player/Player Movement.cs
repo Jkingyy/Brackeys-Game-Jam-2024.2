@@ -11,7 +11,6 @@ public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody2D rb;
 
-    [SerializeField] GameObject _playerGraphics;
 
     // Start is called before the first frame update
     private void Awake()
@@ -368,9 +367,6 @@ public class PlayerMovement : MonoBehaviour
     void Flying(){
         isFlying = false;
         
-        if(isGrounded || isTouchingWall){
-            _playerGraphics.transform.rotation = Quaternion.Euler(0,0,0);
-        }
         if(isGrounded){ // if grounded then restore stamina until jump
             RestoreStamina();
             
@@ -387,14 +383,6 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed); //add velocity for flying
         isFlying = true;
         
-        float rotation;
-        if(facingRight){
-            rotation = -90;
-            
-        } else {
-            rotation = 90;
-        }
-        _playerGraphics.transform.rotation = Quaternion.Euler(0,0,rotation);
         TurnOnStaminaBar(); // make stamina bar visible
 
         DrainStamina();  
