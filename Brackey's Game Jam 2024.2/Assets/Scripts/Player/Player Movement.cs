@@ -159,7 +159,6 @@ public class PlayerMovement : MonoBehaviour
         if (jumpBufferCounter > 0 && coyoteTimeCounter > 0 && hasJumped == false)
         {
             rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
-            SoundFXManager.Instance.PlaySoundFXClip(_jumpSoundEffect,transform, 1f);
             hasJumped = true;
             hasLanded = false;
         }
