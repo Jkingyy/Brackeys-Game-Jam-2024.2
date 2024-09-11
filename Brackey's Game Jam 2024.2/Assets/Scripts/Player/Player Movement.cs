@@ -121,6 +121,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _jumpSpeed = 12; // Height of the jump
     [SerializeField] private float _fallSpeed = 7; // Speed of falling
     [SerializeField] private float _jumpVelocityFalloff = 8; // Rate of decrease in jump velocity
+    [SerializeField] private AudioClip _jumpSoundEffect ;
 
 
     private int numberOfJumps = 1; // Number of jumps the player can perform
@@ -158,7 +159,7 @@ public class PlayerMovement : MonoBehaviour
         if (jumpBufferCounter > 0 && coyoteTimeCounter > 0 && hasJumped == false)
         {
             rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
-
+            SoundFXManager.Instance.PlaySoundFXClip(_jumpSoundEffect,transform, 1f);
             hasJumped = true;
             hasLanded = false;
         }
