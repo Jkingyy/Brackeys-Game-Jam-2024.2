@@ -2633,7 +2633,6 @@ Transform:
   - {fileID: 440778032}
   - {fileID: 100479605}
   - {fileID: 435479484}
-  - {fileID: 9117354620606724099}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1684877158
@@ -2709,6 +2708,7 @@ MonoBehaviour:
   _jumpSpeed: 14
   _fallSpeed: 10
   _jumpVelocityFalloff: 10
+  _jumpSoundEffect: {fileID: 0}
   _playerCanWallJump: 1
   _wallMask:
     serializedVersion: 2
@@ -2835,7 +2835,7 @@ CapsuleCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1758461473}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -3598,7 +3598,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1684877157}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1507864830641073634, guid: d4f205defc02f3949acc14c1091479e5,
         type: 3}
@@ -3608,17 +3608,17 @@ PrefabInstance:
     - target: {fileID: 5414662891911662072, guid: d4f205defc02f3949acc14c1091479e5,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.029999733
+      value: -8.17
       objectReference: {fileID: 0}
     - target: {fileID: 5414662891911662072, guid: d4f205defc02f3949acc14c1091479e5,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.9700003
+      value: 8.3
       objectReference: {fileID: 0}
     - target: {fileID: 5414662891911662072, guid: d4f205defc02f3949acc14c1091479e5,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 40.464565
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5414662891911662072, guid: d4f205defc02f3949acc14c1091479e5,
         type: 3}
@@ -3660,12 +3660,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d4f205defc02f3949acc14c1091479e5, type: 3}
---- !u!4 &9117354620606724099 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5414662891911662072, guid: d4f205defc02f3949acc14c1091479e5,
-    type: 3}
-  m_PrefabInstance: {fileID: 9117354620606724098}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -3679,3 +3673,4 @@ SceneRoots:
   - {fileID: 1261721650}
   - {fileID: 486095013}
   - {fileID: 737166959}
+  - {fileID: 9117354620606724098}
