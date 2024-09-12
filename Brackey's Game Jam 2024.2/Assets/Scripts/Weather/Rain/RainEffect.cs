@@ -21,6 +21,7 @@ public class RainEffect : MonoBehaviour
 		rainIntensity = intensity;
 		ParticleSystem.EmissionModule em = ps.emission;
 		em.rateOverTime = rainIntensity;
+		print("Rain intensity set to: " + rainIntensity);
 	}
 	
 	/// <summary>

@@ -7,7 +7,7 @@ public class WindZone : MonoBehaviour
 
 	private void OnTriggerStay2D(Collider2D other)
 	{
-		print("Wind zone is active!");
+		// print("Wind zone is active!");
 		if (other.CompareTag("Player")) OnWindZoneTrigger?.Invoke(other);
 	}
 }

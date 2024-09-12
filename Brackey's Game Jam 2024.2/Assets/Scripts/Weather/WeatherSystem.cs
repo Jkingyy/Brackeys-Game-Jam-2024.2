@@ -22,15 +22,7 @@ public class WeatherSystem : MonoBehaviour
 
 	private void HandleTimerExpired()
 	{
-		// Change to the next weather state
 		weatherState.CycleWeatherState();
-		
-		// Reset the timer for the next weather state duration
-		int nextStateIndex = weatherState.GetNextWeatherStateIndex();
-		weatherTimer.SetTimer(nextStateIndex);
-		
-		// Activate the particle effect for the new weather state
-		weatherEffects.ActivateWeatherEffect(weatherState.GetCurrentWeatherState());
 	}
 	
 	private void HandleWeatherChanged(WeatherState.State state)

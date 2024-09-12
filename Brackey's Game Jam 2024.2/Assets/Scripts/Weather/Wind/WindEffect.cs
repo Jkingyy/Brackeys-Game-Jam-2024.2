@@ -50,7 +50,7 @@ public class WindEffect : MonoBehaviour
 		if (effectEnabled && other.TryGetComponent<Rigidbody2D>(out var rb)) 
 		{
 			rb.AddForce(new Vector2(windDirection, 0) * windSpeed);
-			print("Applying wind force to player.");
+			// print("Applying wind force to player.");
 		}
 	}
 	
@@ -90,7 +90,8 @@ public class WindEffect : MonoBehaviour
 		windDirection = direction;
 		foreach (ParticleSystem ps in windParticleSystems)
 		{
-			ps.transform.rotation = Quaternion.Euler(0, 0, windDirection * 180);
+			ps.transform.rotation = Quaternion.Euler(0, (windDirection * 90) - 90, 0);
+			print("Wind direction set to: " + ps.transform.rotation);
 		}
 	}
 	

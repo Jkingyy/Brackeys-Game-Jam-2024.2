@@ -30,7 +30,6 @@ public class WeatherEffects : MonoBehaviour
 	public void ActivateWeatherEffect(WeatherState.State weatherState)
 	{
 		currentWeatherEffect = weatherState;
-		DeactivateCurrentWeatherEffect();
 		switch (weatherState)
 		{
 			case WeatherState.State.Sunny:
@@ -54,18 +53,19 @@ public class WeatherEffects : MonoBehaviour
 	
 	void ActivateSunnyWeather()
 	{
-		windEffect.DeactivateWind();
+		windEffect.ActivateWind(.5f);
 		sunny.Play();
-	}
-	
-	void ActivateWindyWeather()
-	{
-		windEffect.ActivateWind(1);
 	}
 	
 	void ActivateCloudyWeather()
 	{
+		DeactivateSunnyWeather();
 		clouds.Play();
+	}
+	
+	void ActivateWindyWeather()
+	{
+		windEffect.SetWindSpeed(1);
 	}
 	
 	void ActivateRainyWeather()
@@ -78,6 +78,7 @@ public class WeatherEffects : MonoBehaviour
 	
 	void ActivateStormyWeather()
 	{
+		print("Activating stormy weather.");
 		clouds.Play();
 		windEffect.SetWindSpeed(1.5f);
 		ActivateRainyWeather();
@@ -111,14 +112,14 @@ public class WeatherEffects : MonoBehaviour
 		sunny.Stop();
 	}
 	
-	void DeactivateWindyWeather()
-	{
-		windEffect.DeactivateWind();
-	}
-	
 	void DeactivateCloudyWeather()
 	{
 		clouds.Stop();
+		windEffect.DeactivateWind();
+	}
+	
+	void DeactivateWindyWeather()
+	{
 		windEffect.DeactivateWind();
 	}
 	
@@ -132,6 +133,7 @@ public class WeatherEffects : MonoBehaviour
 	
 	void DeactivateStormyWeather()
 	{
+		print("Deactivating stormy weather.");
 		clouds.Stop();
 		windEffect.DeactivateWind();
 		rainEffect.DeactivateRain();
