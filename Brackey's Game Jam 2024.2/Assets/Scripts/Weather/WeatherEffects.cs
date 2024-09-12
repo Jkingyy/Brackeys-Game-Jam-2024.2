@@ -2,75 +2,139 @@ using UnityEngine;
 
 public class WeatherEffects : MonoBehaviour
 {
-	[SerializeField] ParticleSystem currentWeatherEffect;
-	[SerializeField] ParticleSystem rain;
-	[SerializeField] ParticleSystem wind;
+	[SerializeField] WeatherState.State currentWeatherEffect;
 	[SerializeField] ParticleSystem lightning;
 	[SerializeField] ParticleSystem sunny;
-	[SerializeField] ParticleSystem cloudy;
+	[SerializeField] ParticleSystem clouds;
+	
+	[SerializeField] GameObject player;
+	private PlayerMovement playerMovement;
+	
+	[SerializeField] WindEffect windEffect;
+	[SerializeField] RainEffect rainEffect;
+	
+	void Awake()
+	{
+		if (player == null) {
+			player = GameObject.FindGameObjectWithTag("Player");
+		}
+		playerMovement = player.GetComponent<PlayerMovement>();
+		lightning.Stop();
+	}
 	
 	void Start()
 	{
-		currentWeatherEffect = sunny;
+		currentWeatherEffect = WeatherState.State.Sunny;
 	}
 	
 	public void ActivateWeatherEffect(WeatherState.State weatherState)
 	{
-		StopCurrentWeatherEffect();
+		currentWeatherEffect = weatherState;
+		DeactivateCurrentWeatherEffect();
 		switch (weatherState)
 		{
 			case WeatherState.State.Sunny:
-				ActivateSunny();
+				ActivateSunnyWeather();
 				break;
 			case WeatherState.State.Cloudy:
-				ActivateCloudy();
+				ActivateCloudyWeather();
 				break;
 			case WeatherState.State.Windy:
-				ActivateWindy();
+				ActivateWindyWeather();
 				break;
 			case WeatherState.State.Rainy:
-				ActivateRain();
+				ActivateRainyWeather();
 				break;
 			case WeatherState.State.Stormy:
-				ActivateLightning();
+				ActivateStormyWeather();
 				break;
 		}
-		print("The weather particle effect is now: " + weatherState);
+		print("The weather effect is now: " + weatherState);
 	}
 	
-	void ActivateRain()
+	void ActivateSunnyWeather()
 	{
-		rain.Play();
-		currentWeatherEffect = rain;
-	}
-	
-	void ActivateWindy()
-	{
-		wind.Play();
-		currentWeatherEffect = wind;
-	}
-	
-	void ActivateLightning()
-	{
-		lightning.Play();
-		currentWeatherEffect = lightning;
-	}
-	
-	void ActivateSunny()
-	{
+		windEffect.DeactivateWind();
 		sunny.Play();
-		currentWeatherEffect = sunny;
 	}
 	
-	void ActivateCloudy()
+	void ActivateWindyWeather()
 	{
-		cloudy.Play();
-		currentWeatherEffect = cloudy;
+		windEffect.ActivateWind(1);
 	}
 	
-	public void StopCurrentWeatherEffect()
+	void ActivateCloudyWeather()
 	{
-		if (currentWeatherEffect != null) currentWeatherEffect.Stop();
+		clouds.Play();
 	}
 	
+	void ActivateRainyWeather()
+	{
+		clouds.Play();
+		windEffect.SetWindSpeed(1.15f);
+		rainEffect.ActivateRain(75); 
+		playerMovement.SetRaining(true);
+	}
+	
+	void ActivateStormyWeather()
+	{
+		clouds.Play();
+		windEffect.SetWindSpeed(1.5f);
+		ActivateRainyWeather();
+		lightning.Play();
+	}
+	
+	public void DeactivateCurrentWeatherEffect()
+	{
+		switch (currentWeatherEffect)
+		{
+			case WeatherState.State.Sunny:
+				DeactivateSunnyWeather();
+				break;
+			case WeatherState.State.Cloudy:
+				DeactivateCloudyWeather();
+				break;
+			case WeatherState.State.Windy:
+				DeactivateWindyWeather();
+				break;
+			case WeatherState.State.Rainy:
+				DeactivateRainyWeather();
+				break;
+			case WeatherState.State.Stormy:
+				DeactivateStormyWeather();
+				break;
+		}
+	}
+	
+	void DeactivateSunnyWeather()
+	{
+		sunny.Stop();
+	}
+	
+	void DeactivateWindyWeather()
+	{
+		windEffect.DeactivateWind();
+	}
+	
+	void DeactivateCloudyWeather()
+	{
+		clouds.Stop();
+		windEffect.DeactivateWind();
+	}
+	
+	void DeactivateRainyWeather()
+	{
+		clouds.Stop();
+		windEffect.DeactivateWind();
+		rainEffect.DeactivateRain();
+		playerMovement.SetRaining(false);
+	}
+	
+	void DeactivateStormyWeather()
+	{
+		clouds.Stop();
+		windEffect.DeactivateWind();
+		rainEffect.DeactivateRain();
+		lightning.Stop();
+	}
 }

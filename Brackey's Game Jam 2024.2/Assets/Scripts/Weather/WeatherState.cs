@@ -4,6 +4,9 @@ public class WeatherState : MonoBehaviour
 {
 	private int currentStateIndex;
 	public static State currentWeatherState;
+	public delegate void WeatherChangedHandler(State state);
+	public event WeatherChangedHandler OnWeatherChanged;
+
 	public enum State
 	{
 		Sunny,
@@ -12,7 +15,7 @@ public class WeatherState : MonoBehaviour
 		Rainy,
 		Stormy,
 	}
-	
+
 	public State[] WeatherStateOrder = new State[]
 	{
 		State.Sunny,
@@ -23,23 +26,27 @@ public class WeatherState : MonoBehaviour
 		State.Rainy,
 		State.Cloudy,
 	};
-	
+
 	void Start()
 	{
 		currentStateIndex = 0;
 		currentWeatherState = WeatherStateOrder[currentStateIndex];
 	}
-	
-	public State GetCurrentWeatherState() 
+
+	public State GetCurrentWeatherState()
 	{
 		return WeatherStateOrder[currentStateIndex];
 	}
+
 	public void CycleWeatherState()
 	{
 		currentStateIndex = (currentStateIndex + 1) % WeatherStateOrder.Length;
 		currentWeatherState = WeatherStateOrder[currentStateIndex];
 		print("The weather is now: " + WeatherStateOrder[currentStateIndex]);
+		
+		OnWeatherChanged?.Invoke(WeatherStateOrder[currentStateIndex]);
 	}
+
 	public int GetNextWeatherStateIndex()
 	{
 		return (currentStateIndex + 1) % WeatherStateOrder.Length;

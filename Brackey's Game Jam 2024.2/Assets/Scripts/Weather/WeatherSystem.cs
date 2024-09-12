@@ -12,6 +12,7 @@ public class WeatherSystem : MonoBehaviour
 	void OnEnable()
 	{
 		weatherTimer.OnTimerExpired += HandleTimerExpired;
+		weatherState.OnWeatherChanged += HandleWeatherChanged;
 	}
 
 	void OnDisable()
@@ -30,5 +31,10 @@ public class WeatherSystem : MonoBehaviour
 		
 		// Activate the particle effect for the new weather state
 		weatherEffects.ActivateWeatherEffect(weatherState.GetCurrentWeatherState());
+	}
+	
+	private void HandleWeatherChanged(WeatherState.State state)
+	{
+		weatherEffects.ActivateWeatherEffect(state);
 	}
 }
