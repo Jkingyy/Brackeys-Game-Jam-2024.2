@@ -14,7 +14,7 @@ public class CloudEffect : MonoBehaviour
 		mainModule = ps.main;
 		minMaxGradient = mainModule.startColor;
 		emissionModule = ps.emission;
-		cloudDarkness = minMaxGradient.colorMax;
+		cloudDarkness = minMaxGradient.colorMin;
 		cloudEmissionRate = ps.emission.rateOverTime.constant;
 	}
 	
@@ -26,7 +26,8 @@ public class CloudEffect : MonoBehaviour
 	{
 		cloudDarkness = color;
 		minMaxGradient = mainModule.startColor;
-		minMaxGradient.colorMax = cloudDarkness;
+		minMaxGradient.colorMin = cloudDarkness;
+		mainModule.startColor = minMaxGradient;
 	}
 	
 	/// <summary>

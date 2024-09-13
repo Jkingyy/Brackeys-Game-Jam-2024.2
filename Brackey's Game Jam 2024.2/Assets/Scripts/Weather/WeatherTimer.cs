@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WeatherTimer : MonoBehaviour
 {
-	private float timer;
+	[SerializeField] float timer;
 	private int currentStateIndex;
 	public float[] timesForWeatherStates = new float[7];
 	

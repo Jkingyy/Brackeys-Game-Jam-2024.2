@@ -8,6 +8,13 @@ public class WeatherSystem : MonoBehaviour
 	public WeatherTimer weatherTimer;
 	public WeatherState weatherState;
 	public WeatherEffects weatherEffects;
+	
+	void Awake()
+	{
+		if (weatherTimer == null) weatherTimer = GetComponent<WeatherTimer>();
+		if (weatherState == null) weatherState = GetComponent<WeatherState>();
+		if (weatherEffects == null) weatherEffects = GetComponent<WeatherEffects>();
+	}
 
 	void OnEnable()
 	{

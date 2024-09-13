@@ -1,20 +1,15 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
 	private Rigidbody2D rb;
 
-	private bool isRainingBlockingFlight = false; //MyPing0 - when adding this you can either set this value from the weather system or adjust this so the player sets this value itself
-	public void SetIsRainingBlockingFlight(bool rainingTooHard)
+	private bool isRainingIntensely = false;
+	public void ToggleRainIntensity()
 	{
-		isRainingBlockingFlight = rainingTooHard;
+		isRainingIntensely = !isRainingIntensely;
 	}
 
 	// Start is called before the first frame update
@@ -24,6 +19,18 @@ public class PlayerMovement : MonoBehaviour
 		rb = GetComponent<Rigidbody2D>();
 
 	}
+	private void OnEnable()
+	{
+		RainEffect.OnRainIntensityLimitReached += ToggleRainIntensity;
+		RainEffect.OnRainIntensityDroppedBelowLimit += ToggleRainIntensity;
+	}
+	
+	private void OnDisable()
+	{
+		RainEffect.OnRainIntensityLimitReached -= ToggleRainIntensity;
+		RainEffect.OnRainIntensityDroppedBelowLimit -= ToggleRainIntensity;
+	}
+	
 	private void Start()
 	{
 		originalGravityScale = rb.gravityScale;
@@ -238,7 +245,7 @@ public class PlayerMovement : MonoBehaviour
 		isTouchingWall = Physics2D.OverlapCircle(_wallCheck.position, _groundCheckRadius, _wallMask);
 
 
-		if (!isRainingBlockingFlight)
+		if (!isRainingIntensely)
 		{ //MyPing0 - This swaps the player movement from grabbing and climbing walls to sliding and jumping from them
 			WallGrab();
 			WallMovement();
@@ -399,7 +406,7 @@ public class PlayerMovement : MonoBehaviour
 
 	void Flying()
 	{
-		if (isRainingBlockingFlight) return; //MyPing0 - this stops the player flying in the rain
+		if (isRainingIntensely) return; //MyPing0 - this stops the player flying in the rain
 
 
 		isFlying = false;

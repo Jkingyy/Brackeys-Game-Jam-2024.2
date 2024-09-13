@@ -8,11 +8,16 @@ public class RainEffect : MonoBehaviour
 	[SerializeField] ParticleSystem ps;
 	private ParticleSystem.EmissionModule emissionModule;
 	
+	public delegate void RainIntensity();
+	public static event RainIntensity OnRainIntensityLimitReached;
+	public static event RainIntensity OnRainIntensityDroppedBelowLimit;
+	
 	/// <summary>
 	/// This is the value that the particle system will use for particles per second.
 	/// </summary>
 	private float rainIntensity;
-	private float flyRainIntensityLimit = 35f;
+	private float flyRainIntensityLimit = 45f;
+	private bool intenseRaining = false;
 	
 	void Awake()
 	{
@@ -34,8 +39,18 @@ public class RainEffect : MonoBehaviour
 		rainIntensity = intensity;
 		emissionModule.rateOverTime = rainIntensity;
 		
-		if (rainIntensity > flyRainIntensityLimit) playerMovement.SetIsRainingBlockingFlight(true);
-		else playerMovement.SetIsRainingBlockingFlight(false);
+		if (rainIntensity > flyRainIntensityLimit) {
+			if (!intenseRaining) {
+				intenseRaining = true;
+				OnRainIntensityLimitReached?.Invoke();
+			}
+		}
+		else if (rainIntensity <= flyRainIntensityLimit) {
+			if (intenseRaining) {
+				intenseRaining = false;
+				OnRainIntensityDroppedBelowLimit?.Invoke();
+			}
+		}
 	}
 	
 	public void ActivateRainEffect()

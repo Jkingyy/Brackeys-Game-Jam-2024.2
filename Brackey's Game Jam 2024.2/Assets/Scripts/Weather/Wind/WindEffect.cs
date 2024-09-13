@@ -17,6 +17,9 @@ public class WindEffect : MonoBehaviour
 	[SerializeField] private Collider2D windZoneCollider;
 	private WindZone windZone;
 	private bool effectEnabled;
+	
+	public delegate void WindEffectToggler(bool active);
+	public static event WindEffectToggler OnWindEffectToggled;
 	void Awake()
 	{
 		if (!windZoneCollider) Debug.LogError("WindEffect: WindZoneCollider not set.");
@@ -47,11 +50,13 @@ public class WindEffect : MonoBehaviour
 	{
 		if (effectEnabled && other.TryGetComponent<Rigidbody2D>(out var rb)) 
 		{
-			rb.AddForce(new Vector2(windDirection, 0) * windSpeed);
-			// print("Applying wind force to player.");
+			rb.AddForce(new Vector2(windDirection, 0) * (windSpeed * 200), ForceMode2D.Force);
 		}
 	}
 	
+	/// <summary>
+	/// Activate the wind effect. This will start the particle system and enable the wind zone collider.
+	/// </summary>
 	public void ActivateWind()
 	{
 		SetWindDirection(GetRandomWindDirection());
@@ -98,6 +103,9 @@ public class WindEffect : MonoBehaviour
 			ParticleSystem.MainModule main = ps.main;
 			main.simulationSpeed = speed;
 		}
+		
+		if (speed >= 1) OnWindEffectToggled?.Invoke(true);
+		else OnWindEffectToggled?.Invoke(false);
 	}
 	
 	private int GetRandomWindDirection()

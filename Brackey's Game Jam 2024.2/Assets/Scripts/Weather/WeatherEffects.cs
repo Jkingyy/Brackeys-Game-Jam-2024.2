@@ -132,7 +132,6 @@ public class WeatherEffects : MonoBehaviour
 		result.windSpeed = Mathf.Lerp(from.windSpeed, to.windSpeed, t);
 		result.lightningActive = to.lightningActive;
 		result.sunRaysActive = to.sunRaysActive;
-		print("Lerping weather effect parameters." + "Rain Emission Rate: " + result.rainEmissionRate);
 		return result;
 	}
 	
