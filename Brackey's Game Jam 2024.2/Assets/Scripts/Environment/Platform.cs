@@ -197,6 +197,7 @@ public class Platform : MonoBehaviour
     }
 
     private void OnCollisionExit2D(Collision2D other) {
+
         if(other.gameObject.tag == "Player") {
             other.transform.SetParent(null);
         }
