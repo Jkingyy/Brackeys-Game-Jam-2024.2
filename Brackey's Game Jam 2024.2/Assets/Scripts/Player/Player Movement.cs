@@ -11,10 +11,10 @@ public class PlayerMovement : MonoBehaviour
 {
 	private Rigidbody2D rb;
 
-	private bool isRaining = false; //MyPing0 - when adding this you can either set this value from the weather system or adjust this so the player sets this value itself
-	public void SetRaining(bool raining)
+	private bool isRainingBlockingFlight = false; //MyPing0 - when adding this you can either set this value from the weather system or adjust this so the player sets this value itself
+	public void SetIsRainingBlockingFlight(bool rainingTooHard)
 	{
-		isRaining = raining;
+		isRainingBlockingFlight = rainingTooHard;
 	}
 
 	// Start is called before the first frame update
@@ -238,7 +238,7 @@ public class PlayerMovement : MonoBehaviour
 		isTouchingWall = Physics2D.OverlapCircle(_wallCheck.position, _groundCheckRadius, _wallMask);
 
 
-		if (!isRaining)
+		if (!isRainingBlockingFlight)
 		{ //MyPing0 - This swaps the player movement from grabbing and climbing walls to sliding and jumping from them
 			WallGrab();
 			WallMovement();
@@ -399,7 +399,7 @@ public class PlayerMovement : MonoBehaviour
 
 	void Flying()
 	{
-		if (isRaining) return; //MyPing0 - this stops the player flying in the rain
+		if (isRainingBlockingFlight) return; //MyPing0 - this stops the player flying in the rain
 
 
 		isFlying = false;

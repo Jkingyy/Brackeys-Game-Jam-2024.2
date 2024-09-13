@@ -27,6 +27,6 @@ public class WeatherSystem : MonoBehaviour
 	
 	private void HandleWeatherChanged(WeatherState.State state)
 	{
-		weatherEffects.ActivateWeatherEffect(state);
+		weatherEffects.SetWeatherEffect(state);
 	}
 }

@@ -5,41 +5,46 @@ using UnityEngine;
 /// </summary>
 public class RainEffect : MonoBehaviour
 {
-	[SerializeField] ParticleSystem ps; 
+	[SerializeField] ParticleSystem ps;
+	private ParticleSystem.EmissionModule emissionModule;
 	
 	/// <summary>
 	/// This is the value that the particle system will use for particles per second.
 	/// </summary>
 	private float rainIntensity;
+	private float flyRainIntensityLimit = 35f;
+	
+	void Awake()
+	{
+		emissionModule = ps.emission;
+	}
 	
 	/// <summary>
 	/// Set the rain intensity. This will set the rate of the particle system.
+	/// <para>
+	/// The particle system will stop and start automatically based on the rate.
+	/// </para>
 	/// </summary>
 	/// <param name="intensity"></param>
-	public void SetRainIntensity(float intensity)
+	public void SetRainIntensity(float intensity, PlayerMovement playerMovement)
 	{
+		if (intensity <= 0) DeactivateRainEffect();
+		else if (!ps.isPlaying) ActivateRainEffect();
+		
 		rainIntensity = intensity;
-		ParticleSystem.EmissionModule em = ps.emission;
-		em.rateOverTime = rainIntensity;
-		print("Rain intensity set to: " + rainIntensity);
+		emissionModule.rateOverTime = rainIntensity;
+		
+		if (rainIntensity > flyRainIntensityLimit) playerMovement.SetIsRainingBlockingFlight(true);
+		else playerMovement.SetIsRainingBlockingFlight(false);
 	}
 	
-	/// <summary>
-	/// Activate the rain effect with a given intensity. This will set the emission rate of the particle system and play it.
-	/// </summary>
-	/// <param name="intensity"></param>
-	public void ActivateRain(int intensity)
+	public void ActivateRainEffect()
 	{
-		SetRainIntensity(intensity);
-		ps.Play();
+		if (!ps.isPlaying) ps.Play();
 	}
 	
-	/// <summary>
-	/// Deactivate the rain effect. This will stop the particle system.
-	/// </summary>
-	public void DeactivateRain()
+	public void DeactivateRainEffect()
 	{
 		ps.Stop(withChildren: true, stopBehavior: ParticleSystemStopBehavior.StopEmitting);
 	}
-	
 }

@@ -25,8 +25,6 @@ public class WindEffect : MonoBehaviour
 		
 		windZone = windZoneCollider.gameObject.GetComponent<WindZone>();
 		
-		SetWindDirection(-1);
-		SetWindSpeed(1);
 		DeactivateWind();
 	}
 	
@@ -54,21 +52,12 @@ public class WindEffect : MonoBehaviour
 		}
 	}
 	
-	/// <summary>
-	/// Activate the wind effect with a given direction and speed. This will play the particle system after setting the rotation and simulation speed of it.
-	///<para>
-	/// If a wind direction is not given, a random direction (either -1 or 1) will be chosen.
-	/// </para>
-	/// </summary>
-	/// <param name="windSpeed"></param>
-	/// <param name="windDirection"></param>
-	public void ActivateWind(float windSpeed, int windDirection = 0)
+	public void ActivateWind()
 	{
-		SetWindDirection(windDirection == 0 ? GetRandomWindDirection() : windDirection);
-		SetWindSpeed(windSpeed);
-		foreach (ParticleSystem ps in windParticleSystems) ps.Play();
+		SetWindDirection(GetRandomWindDirection());
+		foreach (ParticleSystem ps in windParticleSystems) if (!ps.isPlaying) ps.Play();
 		windZoneCollider.enabled = true;
-		effectEnabled = true;
+		effectEnabled = true; 
 	}
 	
 	/// <summary>
@@ -91,7 +80,6 @@ public class WindEffect : MonoBehaviour
 		foreach (ParticleSystem ps in windParticleSystems)
 		{
 			ps.transform.rotation = Quaternion.Euler(0, (windDirection * 90) - 90, 0);
-			print("Wind direction set to: " + ps.transform.rotation);
 		}
 	}
 	
@@ -101,6 +89,9 @@ public class WindEffect : MonoBehaviour
 	/// <param name="speed"></param>
 	public void SetWindSpeed(float speed)
 	{
+		if (speed <= .25f) DeactivateWind();
+		else if (!effectEnabled) ActivateWind();
+		
 		windSpeed = speed;
 		foreach (ParticleSystem ps in windParticleSystems)
 		{
@@ -111,6 +102,6 @@ public class WindEffect : MonoBehaviour
 	
 	private int GetRandomWindDirection()
 	{
-		return Random.Range(-1, 2);
+		return Random.value < 0.5f ? -1 : 1;
 	}
 }
