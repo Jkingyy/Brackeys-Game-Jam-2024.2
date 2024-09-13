@@ -46,8 +46,11 @@ public class Platform : MonoBehaviour
 
         _startingPosition = RoundVectorValuesToInt(transform.position);
         transform.position = _startingPosition;
-        ListOfPositions.Insert(0, _startingPosition);
         _currentTarget = ListOfPositions[_listIndex];
+
+        if(_startingPosition == ListOfPositions[ListOfPositions.Count - 1]){
+            _isLooping = true;
+        }
     }
 
     // Update is called once per frame
@@ -128,6 +131,7 @@ public class Platform : MonoBehaviour
     Vector2 _currentTarget;
     Vector2 velocity = Vector2.zero;
     bool _isIncreasing = true;
+    bool _isLooping = false;
     int _listIndex = 0;
     bool _isWaiting;
     bool _isMoving;
@@ -151,7 +155,11 @@ public class Platform : MonoBehaviour
             _coroutine = WaitAtPosition();
             StartCoroutine(_coroutine);
             if(_listIndex == ListOfPositions.Count - 1) {
-                _isIncreasing = false;
+                if(_isLooping){
+                    _listIndex = -1; // -1 because its about to increment it below
+                } else{
+                    _isIncreasing = false;
+                }
             } else if(_listIndex == 0) {
                 _isIncreasing = true;
             }
@@ -183,6 +191,7 @@ public class Platform : MonoBehaviour
 
     IEnumerator WaitAtPosition()
     {
+        transform.position = _currentTarget;
         _isWaiting = true;
         yield return new WaitForSeconds(WaitTimeSeconds);
         _isWaiting = false;
