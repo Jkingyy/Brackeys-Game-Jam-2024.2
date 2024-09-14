@@ -4,7 +4,10 @@ using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
-	private Rigidbody2D rb;
+
+	private Rigidbody2D rb;  
+  private Knockback knockback;
+  
 	[SerializeField] float maxHorizontalSpeed = 30f;
 	[SerializeField] bool isRainingIntensely = false;
 	public void ToggleRainIntensity()
@@ -17,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
 	{
 		// Get the components attached to the GameObject
 		rb = GetComponent<Rigidbody2D>();
+    knockback = GetComponent<Knockback>();
 
 	}
 	private void OnEnable()
@@ -45,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
 		Grounded();
 		//Animations();
 
-
+    if (knockback.IsBeingKnockedBack) return;
 		if (isDashing) return;
 
 		WallJumping();
@@ -141,11 +145,11 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private float _fallSpeed = 7; // Speed of falling
 	[SerializeField] private float _jumpVelocityFalloff = 8; // Rate of decrease in jump velocity
 	[SerializeField] AudioClip _jumpSoundFX;
-    [SerializeField] AudioClip _buzzingFX;
-    [SerializeField] AudioClip _collectionFX;
+  [SerializeField] AudioClip _buzzingFX;
 
 
-    private int numberOfJumps = 1; // Number of jumps the player can perform
+
+  private int numberOfJumps = 1; // Number of jumps the player can perform
 	private int jumpsRemaining; // Number of jumps remaining
 	private float jumpBufferCounter; // Counter for jump buffer time
 	private float coyoteTimeCounter; // Counter for coyote time
@@ -391,8 +395,8 @@ public class PlayerMovement : MonoBehaviour
 
         rb.gravityScale = 0; // Set gravity to 0 so the player doesn't fall during the dash
         rb.velocity = new Vector2(transform.localScale.x * _dashPower, 0f); // Apply the dash power to the player
-        //ChangeAnimationState(PLAYER_DASH);
-        
+                                                                            //ChangeAnimationState(PLAYER_DASH);
+
         yield return new WaitForSeconds(_dashDuration); // Wait for the dash duration to end
 
 		rb.gravityScale = originalGravityScale; // Reset the gravity scale
@@ -509,7 +513,7 @@ public class PlayerMovement : MonoBehaviour
     }
     #endregion
 
-        #region Animation
+    #region Animation
 
     //animation states    
     const string PLAYER_WALK_SMALL = "Player Walk Small";
@@ -571,7 +575,7 @@ public class PlayerMovement : MonoBehaviour
     private void AirAnims()
     {
         if (isGrounded) return;
-        if(isTouchingWall) return;
+        if (isTouchingWall) return;
         if (isDashing) return;
 
         if (rb.velocity.y > 0)
@@ -584,20 +588,29 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void WallAnims(){
-        if(!isTouchingWall) return;
-        if(isGrounded) return;
-        if(isDashing) return;
+    private void WallAnims()
+    {
+        if (!isTouchingWall) return;
+        if (isGrounded) return;
+        if (isDashing) return;
 
-        if(isWallClimbing){
-            if(vertical < 0){
+        if (isWallClimbing)
+        {
+            if (vertical < 0)
+            {
                 // play climb down
-            } else if(vertical > 0) {
+            }
+            else if (vertical > 0)
+            {
                 // play climb up
-            } else {
+            }
+            else
+            {
                 // play wall grab
             }
-        } else if(isWallSliding){
+        }
+        else if (isWallSliding)
+        {
             //ChangeAnimationState(PLAYER_WALLSLIDE);
         }
 

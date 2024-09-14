@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Collect
   - Moving Platform
+  - Virtual Camera
   layers:
   - Default
   - TransparentFX
