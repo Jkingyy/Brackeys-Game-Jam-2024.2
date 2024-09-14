@@ -5,16 +5,16 @@ public class WeatherEffects : MonoBehaviour
 {
 	private WeatherEffectParameters currentWeatherEffectParameters;
 	private WeatherEffectParameters targetWeatherEffectParameters;
-	[SerializeField] WeatherEffectParameters sunnyWeather = new WeatherEffectParameters
+	[SerializeField] WeatherEffectParameters sunnyWeatherParameters = new WeatherEffectParameters
 	{
 		cloudColor = Color.white,
 		cloudEmissionRate = 0,
 		rainEmissionRate = 0,
-		windSpeed = 0.5f,
+		windSpeed = 0.0f,
 		lightningActive = false,
 		sunRaysActive = true
 	};
-	[SerializeField] WeatherEffectParameters cloudyWeather = new WeatherEffectParameters
+	[SerializeField] WeatherEffectParameters cloudyWeatherParameters = new WeatherEffectParameters
 	{
 		cloudColor = new Color(0.20f, 0.20f, 0.20f, 1f),
 		cloudEmissionRate = 25,
@@ -24,7 +24,7 @@ public class WeatherEffects : MonoBehaviour
 		sunRaysActive = false
 	};
 	
-	[SerializeField] WeatherEffectParameters windyWeather = new WeatherEffectParameters
+	[SerializeField] WeatherEffectParameters windyWeatherParameters = new WeatherEffectParameters
 	{
 		cloudColor = new Color(0.30f, 0.30f, 0.30f, 1f),
 		cloudEmissionRate = 25,
@@ -34,7 +34,7 @@ public class WeatherEffects : MonoBehaviour
 		sunRaysActive = false
 	};
 	
-	[SerializeField] WeatherEffectParameters rainyWeather = new WeatherEffectParameters
+	[SerializeField] WeatherEffectParameters rainyWeatherParameters = new WeatherEffectParameters
 	{
 		cloudColor = new Color(0.5f, 0.5f, 0.5f, 1f),
 		cloudEmissionRate = 35,
@@ -44,7 +44,7 @@ public class WeatherEffects : MonoBehaviour
 		sunRaysActive = false
 	};
 	
-	[SerializeField] WeatherEffectParameters stormyWeather = new WeatherEffectParameters
+	[SerializeField] WeatherEffectParameters stormyWeatherParameters = new WeatherEffectParameters
 	{
 		cloudColor = new Color(0.75f, 0.75f, 0.75f, 1f),
 		cloudEmissionRate = 35,
@@ -70,7 +70,7 @@ public class WeatherEffects : MonoBehaviour
 			player = GameObject.FindGameObjectWithTag("Player");
 		}
 		playerMovement = player.GetComponent<PlayerMovement>();
-		currentWeatherEffectParameters = new WeatherEffectParameters();
+		currentWeatherEffectParameters = sunnyWeatherParameters;
 		targetWeatherEffectParameters = new WeatherEffectParameters();
 		
 	}
@@ -85,19 +85,19 @@ public class WeatherEffects : MonoBehaviour
 		switch (weatherState)
 		{
 			case WeatherState.State.Sunny:
-				targetWeatherEffectParameters = sunnyWeather;
+				targetWeatherEffectParameters = sunnyWeatherParameters;
 				break;
 			case WeatherState.State.Cloudy:
-				targetWeatherEffectParameters = cloudyWeather;
+				targetWeatherEffectParameters = cloudyWeatherParameters;
 				break;
 			case WeatherState.State.Windy:
-				targetWeatherEffectParameters = windyWeather;
+				targetWeatherEffectParameters = windyWeatherParameters;
 				break;
 			case WeatherState.State.Rainy:
-				targetWeatherEffectParameters = rainyWeather;
+				targetWeatherEffectParameters = rainyWeatherParameters;
 				break;
 			case WeatherState.State.Stormy:
-				targetWeatherEffectParameters = stormyWeather;
+				targetWeatherEffectParameters = stormyWeatherParameters;
 				break;
 		}
 		StartCoroutine(TransitionToNextEffect());
@@ -147,6 +147,36 @@ public class WeatherEffects : MonoBehaviour
 	
 		if (weatherEffectParameters.sunRaysActive) sunnyEffect.ActivateSunnyEffect();
 		else sunnyEffect.DeactivateSunnyEffect();
+	}
+	
+	public WeatherEffectParameters GetCurrentWeatherEffectParameters()
+	{
+		return currentWeatherEffectParameters;
+	}
+	
+	public SunnyEffect GetSunnyEffect()
+	{
+		return sunnyEffect;
+	}
+	
+	public CloudEffect GetCloudEffect()
+	{
+		return cloudEffect;
+	}
+	
+	public WindEffect GetWindEffect()
+	{
+		return windEffect;
+	}
+	
+	public RainEffect GetRainEffect()
+	{
+		return rainEffect;
+	}
+	
+	public LightningEffect GetLightningEffect()
+	{
+		return lightningEffect;
 	}
 
 }

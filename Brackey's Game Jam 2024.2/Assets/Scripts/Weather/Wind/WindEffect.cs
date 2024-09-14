@@ -44,7 +44,7 @@ public class WindEffect : MonoBehaviour
 	{
 		if (windZone) windZone.OnWindZoneTrigger -= ApplyWindForceToPlayer;
 	}
-	
+
 	/// <summary>
 	/// While the wind zone is active and the player is inside it, apply a force to the player in the wind direction with the set wind speed.
 	/// </summary>
@@ -100,7 +100,11 @@ public class WindEffect : MonoBehaviour
 	/// <param name="speed"></param>
 	public void SetWindSpeed(float speed)
 	{
-		if (speed <= .25f) DeactivateWind();
+		if (speed <= .25f) {
+			windSpeed = 0f;
+			DeactivateWind();
+			return;
+		}
 		else if (!effectEnabled) ActivateWind();
 		
 		windSpeed = speed;
@@ -117,5 +121,15 @@ public class WindEffect : MonoBehaviour
 	private int GetRandomWindDirection()
 	{
 		return Random.value < 0.5f ? -1 : 1;
+	}
+	
+	public float GetWindSpeed()
+	{
+		return windSpeed;
+	}
+	
+	public int GetWindDirection()
+	{
+		return windDirection;
 	}
 }
