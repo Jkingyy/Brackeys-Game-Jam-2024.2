@@ -6321,6 +6321,7 @@ MonoBehaviour:
   _staminaRecoveryPerSecond: 40
   _staminaBar: {fileID: 315252109}
   canFly: 0
+  isHurt: 0
 --- !u!50 &1758461475
 Rigidbody2D:
   serializedVersion: 4
@@ -7763,12 +7764,12 @@ PrefabInstance:
     - target: {fileID: 4326241656387673272, guid: afd0c2303d93ed847afb188d52e09200,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -12.75
+      value: 4.63
       objectReference: {fileID: 0}
     - target: {fileID: 4326241656387673272, guid: afd0c2303d93ed847afb188d52e09200,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.15
+      value: 0.63
       objectReference: {fileID: 0}
     - target: {fileID: 4326241656387673272, guid: afd0c2303d93ed847afb188d52e09200,
         type: 3}
