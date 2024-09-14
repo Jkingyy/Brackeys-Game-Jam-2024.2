@@ -4652,7 +4652,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1151779527
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8023,6 +8023,7 @@ MonoBehaviour:
   _staminaDrainPerSecondFlying: 20
   _staminaRecoveryPerSecond: 40
   _staminaBar: {fileID: 315252109}
+  staminaBarParent: {fileID: 1151779526}
   canFly: 0
   isHurt: 0
 --- !u!50 &1758461475
@@ -8189,7 +8190,7 @@ MonoBehaviour:
   GameOverPanel: {fileID: 991665145}
   HitStopTime: 0.1
   InvincibilityTime: 0.8
-  CameraShakeTime: 0.5
+  CameraShakeTime: 1
   VerticalKnockback: 10
   HorizontalKnockback: 10
   DamageSounds:
@@ -8197,6 +8198,12 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 9788b25a0f24ec648936c10dfd8ff7bb, type: 3}
   - {fileID: 8300000, guid: e5fd29522406e7d49a006fc9fd52d3f6, type: 3}
   - {fileID: 8300000, guid: 67471d1e0588abe4b8c4a904de8a2985, type: 3}
+  HealthWings:
+  - {fileID: 579050299}
+  - {fileID: 1316834021}
+  - {fileID: 235504257}
+  - {fileID: 418938496}
+  UITimeout: 5
 --- !u!114 &1758461484
 MonoBehaviour:
   m_ObjectHideFlags: 0
