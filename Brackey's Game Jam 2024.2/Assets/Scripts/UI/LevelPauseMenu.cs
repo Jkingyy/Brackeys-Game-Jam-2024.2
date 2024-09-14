@@ -59,4 +59,9 @@ public class LevelPauseMenu : MonoBehaviour
         ResumeGame();
         SceneManager.LoadScene(MAIN_MENU_SCENE);
     }
+
+    public void RestartLevel(){
+        Time.timeScale = 1;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 }
