@@ -1,258 +1,279 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private Knockback knockback;
 
-    public bool isRaining = false; //MyPing0 - when adding this you can either set this value from the weather system or adjust this so the player sets this value itself
+	private Rigidbody2D rb;  
+  private Knockback knockback;
+  
+	[SerializeField] float maxHorizontalSpeed = 30f;
+	[SerializeField] bool isRainingIntensely = false;
+	public void ToggleRainIntensity()
+	{
+		isRainingIntensely = !isRainingIntensely;
+	}
 
-    // Start is called before the first frame update
-    private void Awake()
-    {
-        // Get the components attached to the GameObject
-        rb = GetComponent<Rigidbody2D>();
-        knockback = GetComponent<Knockback>();
+	// Start is called before the first frame update
+	private void Awake()
+	{
+		// Get the components attached to the GameObject
+		rb = GetComponent<Rigidbody2D>();
+    knockback = GetComponent<Knockback>();
 
-    }
-    private void Start()
-    {
-        originalGravityScale = rb.gravityScale;
-        staminaBarParent = _staminaBar.transform.parent.gameObject;
-        currentStamina = _maxFlyingStamina;
-    }
-    // Update is called once per frame
-    private void Update()
-    {
-        
+	}
+	private void OnEnable()
+	{
+		RainEffect.OnRainIntensityLimitReached += ToggleRainIntensity;
+		RainEffect.OnRainIntensityDroppedBelowLimit += ToggleRainIntensity;
+	}
+	
+	private void OnDisable()
+	{
+		RainEffect.OnRainIntensityLimitReached -= ToggleRainIntensity;
+		RainEffect.OnRainIntensityDroppedBelowLimit -= ToggleRainIntensity;
+	}
+	
+	private void Start()
+	{
+		originalGravityScale = rb.gravityScale;
+		staminaBarParent = _staminaBar.transform.parent.gameObject;
+		currentStamina = _maxFlyingStamina;
+	}
+	// Update is called once per frame
+	private void Update()
+	{
+		rb.velocity = new Vector2(Mathf.Clamp(rb.velocity.x, -maxHorizontalSpeed, maxHorizontalSpeed), rb.velocity.y);
+		// Handle player movement functions 
+		Grounded();
+		//Animations();
 
-        // Handle player movement functions 
-        Grounded();
-        //Animations();
+    if (knockback.IsBeingKnockedBack) return;
+		if (isDashing) return;
 
-        if (knockback.IsBeingKnockedBack) return;
-        if (isDashing) return;
-
-        WallJumping();
-        if (isWallJumping) return;
-        Jumping();
-        Walking();
-        Dashing();
-        Flying();
-    }
-
-
-
-    #region Ground Check
-
-    [Header("Ground Check")]
-    [SerializeField] private LayerMask _groundMask; // The layer mask for ground objects
-    [SerializeField] private Transform _groundCheck; // The transform representing the position to check for ground
-    [SerializeField] private float _groundCheckRadius = 0.8f; // The radius for ground check
-    [SerializeField] private bool isGrounded; // Flag indicating if the player is grounded
-
-    // Check if the player is grounded
-    private void Grounded()
-    {
-        isGrounded = Physics2D.OverlapCircle(_groundCheck.position, _groundCheckRadius, _groundMask);
-        if (isGrounded)
-        {
-            isGrounded = true;
-            jumpsRemaining = numberOfJumps;
-        }
-    }
-
-    #endregion
-
-    #region Walking
-
-    [Header("Movement Speeds")]
-    [SerializeField] private float _moveSpeed = 10; // Speed of regular walking
-    [SerializeField] private float _sprintSpeed = 13; // Speed of sprinting
-
-    public float horizontal {get; private set;}  // Horizontal input from player
-    private float vertical; // vertical input from player
-    private bool facingRight = true; // Flag indicating if the player is facing right
-
-    // Handle player walking
-    private void Walking()
-    {
-        horizontal = Input.GetAxisRaw("Horizontal");
-        vertical = Input.GetAxisRaw("Vertical");
-
-        // Adjust velocity based on sprint input
-        if (Input.GetButton("Sprint"))
-        {
-            rb.velocity = new Vector2(horizontal * _sprintSpeed, rb.velocity.y);
-        }
-        else
-        {
-            rb.velocity = new Vector2(horizontal * _moveSpeed, rb.velocity.y);
-        }
-
-        // Flip the player sprite if necessary
-        if (horizontal > 0 && !facingRight)
-        {
-            FlipSprite();
-        }
-        else if (horizontal < 0 && facingRight)
-        {
-            FlipSprite();
-        }
-    }
-
-    private void FlipSprite()
-    {
-        facingRight = !facingRight;
-        Vector3 scale = transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
-    }
-    #endregion
-
-    #region Jumping
+		WallJumping();
+		if (isWallJumping) return;
+		Jumping();
+		Walking();
+		Dashing();
+		Flying();
+		if (!isFlying)
+		{
+			Destroy(flyingSoundObject);
+			flyingSoundObject = null;
+		}
+		
+	}
 
 
-    [Header("Jump Settings")]
-    [SerializeField] private bool _playerCanDoubleJump = true; // Flag indicating if the player can jump
-    [SerializeField] private float _coyoteTime = 0.2f; // Duration of grace period for jumping after leaving ground
-    [SerializeField] private float _jumpBufferTime = 0.1f; // Duration of buffer time for jumping
-    [SerializeField] private float _jumpSpeed = 12; // Height of the jump
-    [SerializeField] private float _fallSpeed = 7; // Speed of falling
-    [SerializeField] private float _jumpVelocityFalloff = 8; // Rate of decrease in jump velocity
+	#region Ground Check
+
+	[Header("Ground Check")]
+	[SerializeField] private LayerMask _groundMask; // The layer mask for ground objects
+	[SerializeField] private Transform _groundCheck; // The transform representing the position to check for ground
+	[SerializeField] private float _groundCheckRadius = 0.8f; // The radius for ground check
+	[SerializeField] private bool isGrounded; // Flag indicating if the player is grounded
+
+	// Check if the player is grounded
+	private void Grounded()
+	{
+		isGrounded = Physics2D.OverlapCircle(_groundCheck.position, _groundCheckRadius, _groundMask);
+		if (isGrounded)
+		{
+			isGrounded = true;
+			jumpsRemaining = numberOfJumps;
+		}
+	}
+
+	#endregion
+
+	#region Walking
+
+	[Header("Movement Speeds")]
+	[SerializeField] private float _moveSpeed = 10; // Speed of regular walking
+	[SerializeField] private float _sprintSpeed = 13; // Speed of sprinting
+
+	private float horizontal; // Horizontal input from player
+	private float vertical; // vertical input from player
+	private bool facingRight = true; // Flag indicating if the player is facing right
+
+	// Handle player walking
+	private void Walking()
+	{
+		horizontal = Input.GetAxisRaw("Horizontal");
+		vertical = Input.GetAxisRaw("Vertical");
+
+		// Adjust velocity based on sprint input
+		if (Input.GetButton("Sprint"))
+		{
+			rb.velocity = new Vector2(horizontal * _sprintSpeed, rb.velocity.y);
+		}
+		else
+		{
+			rb.velocity = new Vector2(horizontal * _moveSpeed, rb.velocity.y);
+		}
+
+		// Flip the player sprite if necessary
+		if (horizontal > 0 && !facingRight)
+		{
+			FlipSprite();
+		}
+		else if (horizontal < 0 && facingRight)
+		{
+			FlipSprite();
+		}
+	}
+
+	private void FlipSprite()
+	{
+		facingRight = !facingRight;
+		Vector3 scale = transform.localScale;
+		scale.x *= -1;
+		transform.localScale = scale;
+	}
+	#endregion
+
+	#region Jumping
 
 
-    private int numberOfJumps = 1; // Number of jumps the player can perform
-    private int jumpsRemaining; // Number of jumps remaining
-    private float jumpBufferCounter; // Counter for jump buffer time
-    private float coyoteTimeCounter; // Counter for coyote time
-
-    private bool hasJumped; // Flag indicating if the player has initiated a jump for animations
-    private bool hasLanded; // Flag indicating if the player has initiated a jump for animations
-
-    // Handle player jumping
-    private void Jumping()
-    {
-
-        // Reset coyote time counter if the player is grounded
-        if (isGrounded)
-        {
-            coyoteTimeCounter = _coyoteTime;
-        }
-        else
-        {
-            coyoteTimeCounter -= Time.deltaTime;
-        }
-
-        if (Input.GetButtonDown("Jump"))
-        {
-            jumpBufferCounter = _jumpBufferTime;
-        }
-        else
-        {
-            jumpBufferCounter -= Time.deltaTime;
-        }
-
-        // Coyote time jump (first jump off the ground)
-        if (jumpBufferCounter > 0 && coyoteTimeCounter > 0 && hasJumped == false)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
-            hasJumped = true;
-            hasLanded = false;
-        }
-
-        if (isGrounded && rb.velocity.y < 0)
-        {
-            hasJumped = false;
-            if (!hasLanded)
-            {
-                hasLanded = true;
-            }
-        }
-
-
-        if (Input.GetButtonUp("Jump"))
-        {
-            coyoteTimeCounter = 0; // Reset coyote time counter if the player releases the jump button to stop accidental double jumps
-        }
-
-        if (!isWallGrabbing)
-        {
-
-            // Apply gravity and falloff to jump velocity
-            if (rb.velocity.y < _jumpVelocityFalloff || rb.velocity.y > 0 && !Input.GetButton("Jump"))
-            {
-                rb.velocity += Vector2.up * (_fallSpeed * Physics.gravity.y * Time.deltaTime); //VARIABLE JUMP HEIGHT - gravity is applied to the jump velocity
-
-            }
-        }
+	[Header("Jump Settings")]
+	[SerializeField] private bool _playerCanDoubleJump = true; // Flag indicating if the player can jump
+	[SerializeField] private float _coyoteTime = 0.2f; // Duration of grace period for jumping after leaving ground
+	[SerializeField] private float _jumpBufferTime = 0.1f; // Duration of buffer time for jumping
+	[SerializeField] private float _jumpSpeed = 12; // Height of the jump
+	[SerializeField] private float _fallSpeed = 7; // Speed of falling
+	[SerializeField] private float _jumpVelocityFalloff = 8; // Rate of decrease in jump velocity
+	[SerializeField] AudioClip _jumpSoundFX;
+  [SerializeField] AudioClip _buzzingFX;
 
 
 
+  private int numberOfJumps = 1; // Number of jumps the player can perform
+	private int jumpsRemaining; // Number of jumps remaining
+	private float jumpBufferCounter; // Counter for jump buffer time
+	private float coyoteTimeCounter; // Counter for coyote time
 
-        if (!_playerCanDoubleJump) return;
+	private bool hasJumped; // Flag indicating if the player has initiated a jump for animations
+	private bool hasLanded; // Flag indicating if the player has initiated a jump for animations
 
-        // Mid air jumps - if the player is not grounded and has jumps remaining they can jump again
-        if (Input.GetButtonDown("Jump") && coyoteTimeCounter < 0 && jumpsRemaining > 0 && !isWallSliding)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
-            jumpsRemaining--;
-        }
+	// Handle player jumping
+	private void Jumping()
+	{
 
-    }
+		// Reset coyote time counter if the player is grounded
+		if (isGrounded)
+		{
+			coyoteTimeCounter = _coyoteTime;
+		}
+		else
+		{
+			coyoteTimeCounter -= Time.deltaTime;
+		}
 
-    #endregion
+		if (Input.GetButtonDown("Jump"))
+		{
+			jumpBufferCounter = _jumpBufferTime;
+		}
+		else
+		{
+			jumpBufferCounter -= Time.deltaTime;
+		}
 
-    #region Wall Jumping
-    [Header("General Wall Settings")]
-    [SerializeField] private bool _playerCanWallJump = true; // Flag indicating if the player can wall jump
-    [SerializeField] private LayerMask _wallMask; // The layer mask for wall objects
-    [SerializeField] private Transform _wallCheck; // The transform representing the position to check for walls
-    private bool isTouchingWall; // Flag indicating if the player is touching a wall
+		// Coyote time jump (first jump off the ground)
+		if (jumpBufferCounter > 0 && coyoteTimeCounter > 0 && hasJumped == false)
+		{
+			SoundFXManager.Instance.PlaySoundFXClipAtRandomPitch(_jumpSoundFX, transform, 0.25f,0.25f);
+			rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
+			hasJumped = true;
+			hasLanded = false;
+		}
+
+		if (isGrounded && rb.velocity.y < 0)
+		{
+			hasJumped = false;
+			if (!hasLanded)
+			{
+				hasLanded = true;
+			}
+		}
+
+
+		if (Input.GetButtonUp("Jump"))
+		{
+			coyoteTimeCounter = 0; // Reset coyote time counter if the player releases the jump button to stop accidental double jumps
+		}
+
+		if (!isWallGrabbing)
+		{
+
+			// Apply gravity and falloff to jump velocity
+			if (rb.velocity.y < _jumpVelocityFalloff || rb.velocity.y > 0 && !Input.GetButton("Jump"))
+			{
+				rb.velocity += Vector2.up * (_fallSpeed * Physics.gravity.y * Time.deltaTime); //VARIABLE JUMP HEIGHT - gravity is applied to the jump velocity
+
+			}
+		}
+
+
+
+
+		if (!_playerCanDoubleJump) return;
+
+		// Mid air jumps - if the player is not grounded and has jumps remaining they can jump again
+		if (Input.GetButtonDown("Jump") && coyoteTimeCounter < 0 && jumpsRemaining > 0 && !isWallSliding)
+		{
+			rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
+			jumpsRemaining--;
+		}
+
+	}
+
+	#endregion
+
+	#region Wall Jumping
+	[Header("General Wall Settings")]
+	[SerializeField] private bool _playerCanWallJump = true; // Flag indicating if the player can wall jump
+	[SerializeField] private LayerMask _wallMask; // The layer mask for wall objects
+	[SerializeField] private Transform _wallCheck; // The transform representing the position to check for walls
+	private bool isTouchingWall; // Flag indicating if the player is touching a wall
 
     [Header("Wall Movement Settings")]
     [SerializeField] private float _wallSlideSpeed = 2f; // Speed of sliding down a wall
-    public bool isWallSliding; // Flag indicating if the player is sliding down a wall
-    public bool isWallClimbing; // Flag indicating if the player is climbing on a wall
-    public bool isWallGrabbing; // Flag indicating if the player is holding onto a wall
+    private bool isWallSliding; // Flag indicating if the player is sliding down a wall
+    private bool isWallClimbing; // Flag indicating if the player is climbing up a wall
+    private bool isWallGrabbing; // Flag indicating if the player is holding onto a wall
 
-    [Header("Wall Jump Settings")]
-    [SerializeField] private float _wallJumpingTime = 0.2f;
-    [SerializeField] private float _wallJumpingDuration = 0.2f;
-    [SerializeField] private Vector2 _wallJumpingPower = new Vector2(8f, 16f);
+	[Header("Wall Jump Settings")]
+	[SerializeField] private float _wallJumpingTime = 0.2f;
+	[SerializeField] private float _wallJumpingDuration = 0.2f;
+	[SerializeField] private Vector2 _wallJumpingPower = new Vector2(8f, 16f);
 
-    public bool isWallJumping; // Flag indicating if the player is wall jumping
+    private bool isWallJumping; // Flag indicating if the player is wall jumping
     private float wallJumpingDir;
     private float wallJumpingCounter;
 
-    private void WallJumping()
-    {
-        if (!_playerCanWallJump) return;
+	private void WallJumping()
+	{
+		if (!_playerCanWallJump) return;
 
-        isTouchingWall = Physics2D.OverlapCircle(_wallCheck.position, _groundCheckRadius, _wallMask);
+		isTouchingWall = Physics2D.OverlapCircle(_wallCheck.position, _groundCheckRadius, _wallMask);
 
 
-        if (!isRaining)
-        { //MyPing0 - This swaps the player movement from grabbing and climbing walls to sliding and jumping from them
-            WallGrab();
-            WallMovement();
-        }
-        else
-        {
-            WallSlide();
-        }
+		if (!isRainingIntensely)
+		{ //MyPing0 - This swaps the player movement from grabbing and climbing walls to sliding and jumping from them
+			WallGrab();
+			WallMovement();
+		}
+		else
+		{
+			WallSlide();
+		}
 
-        WallJump();
-    }
-    private void WallGrab()
-    {
+		WallJump();
+	}
+	private void WallGrab()
+	{
 
         if (isTouchingWall && !isGrounded && horizontal != 0 && vertical == 0)  // If the player is touching a wall and not grounded and moving horizontally into the wall, hold the wall
         {
@@ -271,8 +292,8 @@ public class PlayerMovement : MonoBehaviour
 
 
 
-    private void WallMovement()
-    {
+	private void WallMovement()
+	{
 
         // If the player is touching a wall and not grounded and moving horizontally into the wall, slide down the wall
         if (vertical < 0 && isWallGrabbing)
@@ -289,83 +310,88 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void WallSlide()
-    {
-        // If the player is touching a wall and not grounded and moving horizontally into the wall, slide down the wall
-        if (isTouchingWall && !isGrounded && horizontal != 0)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -_wallSlideSpeed, float.MaxValue));
-            isWallSliding = true;
-        }
-        else
-        {
-            isWallSliding = false;
-        }
-    }
-    private void WallJump()
-    {
-        if (isWallGrabbing || isWallSliding)
-        {
-            isWallJumping = false;
+	private void WallSlide()
+	{
+		// If the player is touching a wall and not grounded and moving horizontally into the wall, slide down the wall
+		if (isTouchingWall && !isGrounded && horizontal != 0)
+		{
+			rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -_wallSlideSpeed, float.MaxValue));
+			isWallSliding = true;
+		}
+		else
+		{
+			isWallSliding = false;
+		}
+	}
+	private void WallJump()
+	{
+		if (isWallGrabbing || isWallSliding)
+		{
+			isWallJumping = false;
 
-            wallJumpingDir = -transform.localScale.x;
-            wallJumpingCounter = _wallJumpingTime; // gives a small buffer time to jump off the wall
+			wallJumpingDir = -transform.localScale.x;
+			wallJumpingCounter = _wallJumpingTime; // gives a small buffer time to jump off the wall
 
-            CancelInvoke("StopWallJumping");
-        }
-        else
-        {
-            wallJumpingCounter -= Time.deltaTime;
-        }
+			CancelInvoke("StopWallJumping");
+		}
+		else
+		{
+			wallJumpingCounter -= Time.deltaTime;
+		}
 
-        if (Input.GetButtonDown("Jump") && wallJumpingCounter > 0)
-        {
-            isWallJumping = true;
-            rb.velocity = new Vector2(wallJumpingDir * _wallJumpingPower.x, _wallJumpingPower.y);
-            wallJumpingCounter = 0;
-            if (transform.localScale.x != wallJumpingDir)
-            {
-                FlipSprite();
-            }
+		if (Input.GetButtonDown("Jump") && wallJumpingCounter > 0)
+		{
+			isWallJumping = true;
+			rb.velocity = new Vector2(wallJumpingDir * _wallJumpingPower.x, _wallJumpingPower.y);
+			wallJumpingCounter = 0;
+			if (transform.localScale.x != wallJumpingDir)
+			{
+				FlipSprite();
+			}
 
-            Invoke("StopWallJumping", _wallJumpingDuration);
-        }
-    }
+			Invoke("StopWallJumping", _wallJumpingDuration);
+		}
+	}
 
-    private void StopWallJumping()
-    {
-        isWallJumping = false;
-    }
-    #endregion
+	private void StopWallJumping()
+	{
+		isWallJumping = false;
+	}
+	
+	public bool GetIsWallJumping()
+	{
+		return isWallJumping;
+	}
+	#endregion
 
-    #region Dashing
+	#region Dashing
 
-    [Header("Dash Settings")]
-    [SerializeField] private bool _playerHasDashAbility = true; // Flag indicating if the player can dash
-    [SerializeField] private float _dashPower = 24f; // Power/speed of the dash
-    [SerializeField] private float _dashDuration = 0.2f; // How long the dash lasts
-    [SerializeField] private float _dashCooldown = 1f; // Cooldown time between dashes
+	[Header("Dash Settings")]
+	[SerializeField] private bool _playerHasDashAbility = true; // Flag indicating if the player can dash
+	[SerializeField] private float _dashPower = 24f; // Power/speed of the dash
+	[SerializeField] private float _dashDuration = 0.2f; // How long the dash lasts
+	[SerializeField] private float _dashCooldown = 1f; // Cooldown time between dashes
 
-    private float originalGravityScale;
-    private bool canDash = true; // Flag indicating if the player can dash
-    public bool isDashing = false; // Flag indicating if the player is in the middle of dashing
+	private float originalGravityScale;
+	private bool canDash = true; // Flag indicating if the player can dash
+	public bool isDashing = false; // Flag indicating if the player is in the middle of dashing
 
-    private void Dashing()
-    {
-        if (!_playerHasDashAbility) return;
+	private void Dashing()
+	{
+		if (!_playerHasDashAbility) return;
 
-        // If the player presses the dash button and can dash, start the dash coroutine
-        if (Input.GetButtonDown("Dash") && canDash)
-        {
-            StartCoroutine(Dash());
-        }
-    }
+		// If the player presses the dash button and can dash, start the dash coroutine
+		if (Input.GetButtonDown("Dash") && canDash)
+		{
+			StartCoroutine(Dash());
+		}
+	}
 
-    private IEnumerator Dash()
-    {
+	private IEnumerator Dash()
+	{
 
-        canDash = false; // Prevent the player from dashing again until the cooldown is over - is set to true in the grounded function
-        isDashing = true; // Sets flag that the player is currently dashing
+		canDash = false; // Prevent the player from dashing again until the cooldown is over - is set to true in the grounded function
+		isDashing = true; // Sets flag that the player is currently dashing
 
         rb.gravityScale = 0; // Set gravity to 0 so the player doesn't fall during the dash
         rb.velocity = new Vector2(transform.localScale.x * _dashPower, 0f); // Apply the dash power to the player
@@ -373,105 +399,115 @@ public class PlayerMovement : MonoBehaviour
 
         yield return new WaitForSeconds(_dashDuration); // Wait for the dash duration to end
 
-        rb.gravityScale = originalGravityScale; // Reset the gravity scale
-        isDashing = false;
+		rb.gravityScale = originalGravityScale; // Reset the gravity scale
+		isDashing = false;
 
-        yield return new WaitForSeconds(_dashCooldown); // Wait for the dash cooldown to end
-        canDash = true; // Allow the player to dash again
-    }
-    #endregion
+		yield return new WaitForSeconds(_dashCooldown); // Wait for the dash cooldown to end
+		canDash = true; // Allow the player to dash again
+	}
+	
+	public bool GetIsDashing()
+	{
+		return isDashing;
+	}
+	#endregion
 
-    #region Flying
-    [Header("Flying Settings")]
+	#region Flying
+	[Header("Flying Settings")]
 
-    [SerializeField] float _flyingSpeed = 14;
-    [SerializeField] float _maxFlyingStamina = 100;
-    [SerializeField] float _staminaDrainPerSecondFlying = 20;
-    [SerializeField] float _staminaRecoveryPerSecond = 40;
-    [SerializeField] Image _staminaBar;
-
-
-
-    float currentStamina;
-    private GameObject staminaBarParent;
-    public bool canFly;
-    private bool isFlying;
-
-    void Flying()
-    {
-        if (isRaining) return; //MyPing0 - this stops the player flying in the rain
+	[SerializeField] float _flyingSpeed = 14;
+	[SerializeField] float _maxFlyingStamina = 100;
+	[SerializeField] float _staminaDrainPerSecondFlying = 20;
+	[SerializeField] float _staminaRecoveryPerSecond = 40;
+	[SerializeField] Image _staminaBar;
 
 
-        isFlying = false;
 
-        if (isGrounded)
-        { // if grounded then restore stamina until jump
-            RestoreStamina();
+	float currentStamina;
+	private GameObject staminaBarParent;
+	public bool canFly;
+	private bool isFlying;
+	private GameObject flyingSoundObject;
 
-            return;
-        }
-        if (!canFly) return; // if cant fly eg. no stamina/player is in the storm return
-        if (!Input.GetButton("Jump")) return; // if not holding the fly button return
-        if (currentStamina <= 0)
-        {
-            canFly = false;
-            return; // player is out of stamina
-        }
+	void Flying()
+	{
+		if (isRainingIntensely) return; //MyPing0 - this stops the player flying in the rain
 
 
-        rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed); //add velocity for flying
-        isFlying = true;
+		isFlying = false;
+
+		if (isGrounded)
+		{ // if grounded then restore stamina until jump
+			RestoreStamina();
+
+			return;
+		}
+		if (!canFly) return; // if cant fly eg. no stamina/player is in the storm return
+		if (!Input.GetButton("Jump")) return; // if not holding the fly button return
+		if (currentStamina <= 0)
+		{
+			canFly = false;
+			return; // player is out of stamina
+		}
+
+
+		rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed); //add velocity for flying
+		isFlying = true;
+		if (flyingSoundObject == null)
+		{
+			flyingSoundObject = SoundFXManager.Instance.PlayLoopingSoundFXClip(_buzzingFX, transform, 0.25f);
+		}
 
         TurnOnStaminaBar(); // make stamina bar visible
 
-        DrainStamina();
-    }
+		DrainStamina();
+	}
 
-    void RestoreStamina()
-    {
-        if (currentStamina == _maxFlyingStamina)
-        {
-            canFly = true;
-            return;
-        }
-
-
-        float restoreAmount = _staminaRecoveryPerSecond / (1 / Time.deltaTime);
-
-        currentStamina += restoreAmount;
+	void RestoreStamina()
+	{
+		if (currentStamina == _maxFlyingStamina)
+		{
+			canFly = true;
+			return;
+		}
 
 
-        if (currentStamina > _maxFlyingStamina)
-        {
-            currentStamina = _maxFlyingStamina;
-            Invoke("TurnOffStaminaBar", 1); //turns stamina bar off after 1 second
-        }
+		float restoreAmount = _staminaRecoveryPerSecond / (1 / Time.deltaTime);
 
-        UpdateStaminaBar();
-    }
-    void DrainStamina()
-    {
-        float drainAmount = _staminaDrainPerSecondFlying / (1 / Time.deltaTime);
+		currentStamina += restoreAmount;
 
-        currentStamina -= drainAmount;
 
-        UpdateStaminaBar();
+		if (currentStamina > _maxFlyingStamina)
+		{
+			currentStamina = _maxFlyingStamina;
+			Invoke("TurnOffStaminaBar", 1); //turns stamina bar off after 1 second
+		}
 
-    }
-    void UpdateStaminaBar()
-    {
-        _staminaBar.fillAmount = currentStamina / _maxFlyingStamina;
-    }
+		UpdateStaminaBar();
+	}
+	void DrainStamina()
+	{
+		float drainAmount = _staminaDrainPerSecondFlying / (1 / Time.deltaTime);
 
-    void TurnOffStaminaBar()
-    {
-        if (staminaBarParent.activeSelf == false) return;
+		currentStamina -= drainAmount;
 
-        staminaBarParent.gameObject.SetActive(false);
-    }
-    void TurnOnStaminaBar()
-    {
-        if (staminaBarParent.activeSelf == true) return;
+		UpdateStaminaBar();
+
+	}
+	void UpdateStaminaBar()
+	{
+		_staminaBar.fillAmount = currentStamina / _maxFlyingStamina;
+	}
+
+	void TurnOffStaminaBar()
+	{
+		if (staminaBarParent.activeSelf == false) return;
+
+		staminaBarParent.gameObject.SetActive(false);
+	}
+	void TurnOnStaminaBar()
+	{
+		if (staminaBarParent.activeSelf == true) return;
 
         staminaBarParent.gameObject.SetActive(true);
     }

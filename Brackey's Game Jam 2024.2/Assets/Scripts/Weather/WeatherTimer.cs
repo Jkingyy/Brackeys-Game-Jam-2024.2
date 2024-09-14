@@ -2,13 +2,12 @@ using UnityEngine;
 
 public class WeatherTimer : MonoBehaviour
 {
-	private float timer;
+	[SerializeField] float timer;
 	private int currentStateIndex;
 	public float[] timesForWeatherStates = new float[7];
 	
 	public delegate void TimerExpiredHandler();
 	public event TimerExpiredHandler OnTimerExpired;
-	
 	
 	void Start()
 	{
@@ -16,6 +15,16 @@ public class WeatherTimer : MonoBehaviour
 		timer = timesForWeatherStates[currentStateIndex];
 	}
 
+	void OnEnable() 
+	{
+		OnTimerExpired += CycleTimer;
+	}
+	
+	void OnDisable()
+	{
+		OnTimerExpired -= CycleTimer;
+	}
+	
 	// Update is called once per frame
 	void Update()
 	{
@@ -25,6 +34,11 @@ public class WeatherTimer : MonoBehaviour
 		{
 			OnTimerExpired?.Invoke();
 		}
+	}
+	
+	public void CycleTimer()
+	{
+		SetTimer(currentStateIndex + 1);
 	}
 	
 	// Set the timer for the next state
