@@ -48,8 +48,11 @@ public class WindEffect : MonoBehaviour
 	/// <param name="other"></param>
 	private void ApplyWindForceToPlayer(Collider2D other)
 	{
-		if (effectEnabled && other.TryGetComponent<Rigidbody2D>(out var rb)) 
+		if (effectEnabled && other.TryGetComponent<PlayerMovement>(out var playerMovement)) 
 		{
+			if(playerMovement.isWallClimbing || playerMovement.isWallGrabbing || playerMovement.isWallSliding || playerMovement.isWallJumping) return;
+			
+			other.TryGetComponent<Rigidbody2D>(out var rb);
 			rb.AddForce(new Vector2(windDirection, 0) * (windSpeed * 200), ForceMode2D.Force);
 		}
 	}
