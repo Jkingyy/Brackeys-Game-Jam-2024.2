@@ -13,7 +13,7 @@ public class Damage : MonoBehaviour
     [SerializeField] float VerticalKnockback;
     [SerializeField] float HorizontalKnockback;
     [SerializeField] AudioClip[] DamageSounds;
-
+    [SerializeField] GameObject[] HealthWings;
     private int currentHealth;
 
     private float invincibilityTimeCounter;
@@ -45,6 +45,9 @@ public class Damage : MonoBehaviour
         if(invincibilityTimeCounter > 0)return;
 
         currentHealth -= damage;
+        playerMovement.TurnOnStaminaBar();
+        Transform currentWing = HealthWings[currentHealth].transform.GetChild(0);
+        currentWing.gameObject.SetActive(false);
         SoundFXManager.Instance.PlayRandomSoundFXClip(DamageSounds,transform,1f);
         if (currentHealth <= 0){
             GameOver();
@@ -56,12 +59,7 @@ public class Damage : MonoBehaviour
 
     private void ApplyKnockback(Vector2 direction){
         if(isWaiting) return;
-        //do Knockback
-        //Stop player inputs
-
-
-        
-
+      
         //start InvincibilityTime
         invincibilityTimeCounter = InvincibilityTime;
 
@@ -87,9 +85,11 @@ public class Damage : MonoBehaviour
         } else {
             knockback.CallKnockback(direction, Vector2.up, 0);   
         }
-        
+        Invoke("TurnOffStaminaBar", playerMovement.UITimeout);
+    }   
+    private void TurnOffStaminaBar(){
+        playerMovement.TurnOffStaminaBar();
     }
-
     void GameOver(){
         Time.timeScale = 0;
         GameOverPanel.SetActive(true);

@@ -38,7 +38,6 @@ public class PlayerMovement : MonoBehaviour
 	private void Start()
 	{
 		originalGravityScale = rb.gravityScale;
-		staminaBarParent = _staminaBar.transform.parent.gameObject;
 		currentStamina = _maxFlyingStamina;
 	}
 	// Update is called once per frame
@@ -131,6 +130,12 @@ public class PlayerMovement : MonoBehaviour
 		Vector3 scale = transform.localScale;
 		scale.x *= -1;
 		transform.localScale = scale;
+
+
+		//flip health UI
+		scale = staminaBarParent.transform.localScale;
+		scale.x *= -1;
+		staminaBarParent.transform.localScale = scale;
 	}
 	#endregion
 
@@ -420,11 +425,12 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] float _staminaDrainPerSecondFlying = 20;
 	[SerializeField] float _staminaRecoveryPerSecond = 40;
 	[SerializeField] Image _staminaBar;
+	[SerializeField] private GameObject staminaBarParent;
+	public float UITimeout = 3;
 
 
 
 	float currentStamina;
-	private GameObject staminaBarParent;
 	public bool canFly;
 	private bool isFlying;
 	private GameObject flyingSoundObject;
@@ -480,7 +486,7 @@ public class PlayerMovement : MonoBehaviour
 		if (currentStamina > _maxFlyingStamina)
 		{
 			currentStamina = _maxFlyingStamina;
-			Invoke("TurnOffStaminaBar", 1); //turns stamina bar off after 1 second
+			Invoke("TurnOffStaminaBar", UITimeout); 
 		}
 
 		UpdateStaminaBar();
@@ -499,13 +505,13 @@ public class PlayerMovement : MonoBehaviour
 		_staminaBar.fillAmount = currentStamina / _maxFlyingStamina;
 	}
 
-	void TurnOffStaminaBar()
+	public void TurnOffStaminaBar()
 	{
 		if (staminaBarParent.activeSelf == false) return;
 
 		staminaBarParent.gameObject.SetActive(false);
 	}
-	void TurnOnStaminaBar()
+	public void TurnOnStaminaBar()
 	{
 		if (staminaBarParent.activeSelf == true) return;
 
