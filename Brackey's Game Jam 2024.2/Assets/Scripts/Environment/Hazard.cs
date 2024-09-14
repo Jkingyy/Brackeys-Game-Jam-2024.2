@@ -16,12 +16,16 @@ public class Hazard : MonoBehaviour
     {
         
     }
-    private void OnCollisionEnter2D(Collision2D other) {
+    private void OnCollisionStay2D(Collision2D other) {
         if(other.gameObject.tag == "Player"){
             Damage player = other.gameObject.GetComponent<Damage>();
             if(player != null){
-                player.TakeDamage(Damage, transform.position);
+                player.TakeDamage(Damage, GetHitDirection(player.transform.position));
             }
         }
+    }
+
+    private Vector2 GetHitDirection(Vector2 playerPosition){
+        return (playerPosition - (Vector2)transform.position).normalized;
     }
 }

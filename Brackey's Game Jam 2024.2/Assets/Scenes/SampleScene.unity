@@ -4599,6 +4599,7 @@ GameObject:
   - component: {fileID: 1314186870}
   - component: {fileID: 1314186872}
   - component: {fileID: 1314186871}
+  - component: {fileID: 1314186873}
   m_Layer: 0
   m_Name: cm
   m_TagString: Untagged
@@ -4676,6 +4677,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0b09e7857660247b1477e93731de29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1314186873
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1314186869}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68bb026fafb42b14791938953eaace77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_NoiseProfile: {fileID: 11400000, guid: 69ce8388f6785dd4c8c39915efece2f4, type: 2}
+  m_PivotOffset: {x: 0, y: 0, z: 0}
+  m_AmplitudeGain: 0
+  m_FrequencyGain: 0
+  mNoiseOffsets: {x: 159.61063, y: 795.48645, z: 840.766}
 --- !u!1 &1315847489
 GameObject:
   m_ObjectHideFlags: 0
@@ -6799,9 +6817,10 @@ GameObject:
   - component: {fileID: 1684877157}
   - component: {fileID: 1684877156}
   - component: {fileID: 1684877158}
+  - component: {fileID: 1684877159}
   m_Layer: 0
   m_Name: Virtual Camera
-  m_TagString: Untagged
+  m_TagString: Virtual Camera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6876,6 +6895,18 @@ MonoBehaviour:
   m_Offset: {x: 0, y: 4, z: -15}
   m_ApplyAfter: 0
   m_PreserveComposition: 0
+--- !u!114 &1684877159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1684877154}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 053e340bbdde7af47917c690206ca6ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1711859334
 GameObject:
   m_ObjectHideFlags: 0
@@ -7137,12 +7168,12 @@ PrefabInstance:
     - target: {fileID: 4326241656387673272, guid: afd0c2303d93ed847afb188d52e09200,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -20.15
+      value: -26.85
       objectReference: {fileID: 0}
     - target: {fileID: 4326241656387673272, guid: afd0c2303d93ed847afb188d52e09200,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.06
+      value: 6.44
       objectReference: {fileID: 0}
     - target: {fileID: 4326241656387673272, guid: afd0c2303d93ed847afb188d52e09200,
         type: 3}
@@ -7228,6 +7259,7 @@ GameObject:
   - component: {fileID: 1758461474}
   - component: {fileID: 1758461480}
   - component: {fileID: 1758461483}
+  - component: {fileID: 1758461484}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -7448,6 +7480,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxHealth: 4
   GameOverPanel: {fileID: 991665145}
+  HitStopTime: 0.1
+  InvincibilityTime: 0.8
+  CameraShakeTime: 0.5
+  VerticalKnockback: 10
+  HorizontalKnockback: 10
+--- !u!114 &1758461484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1758461473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bf4dc54de015d24f8951d4d86f68430, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  KnockbackTime: 0.1
+  hitDirectionForce: 15
+  constForce: 10
+  inputForce: 7.5
+  knockbackForceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1761690221
 GameObject:
   m_ObjectHideFlags: 0
