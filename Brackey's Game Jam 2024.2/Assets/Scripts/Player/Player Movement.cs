@@ -54,6 +54,11 @@ public class PlayerMovement : MonoBehaviour
 		Walking();
 		Dashing();
 		Flying();
+		if (!isFlying)
+		{
+			Destroy(flyingSoundObject);
+			flyingSoundObject = null;
+		}
 		
 	}
 
@@ -135,9 +140,12 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private float _jumpSpeed = 12; // Height of the jump
 	[SerializeField] private float _fallSpeed = 7; // Speed of falling
 	[SerializeField] private float _jumpVelocityFalloff = 8; // Rate of decrease in jump velocity
+	[SerializeField] AudioClip _jumpSoundFX;
+    [SerializeField] AudioClip _buzzingFX;
+    [SerializeField] AudioClip _collectionFX;
 
-    [SerializeField] private AudioClip _jumpSound;
-	private int numberOfJumps = 1; // Number of jumps the player can perform
+
+    private int numberOfJumps = 1; // Number of jumps the player can perform
 	private int jumpsRemaining; // Number of jumps remaining
 	private float jumpBufferCounter; // Counter for jump buffer time
 	private float coyoteTimeCounter; // Counter for coyote time
@@ -171,10 +179,10 @@ public class PlayerMovement : MonoBehaviour
 		// Coyote time jump (first jump off the ground)
 		if (jumpBufferCounter > 0 && coyoteTimeCounter > 0 && hasJumped == false)
 		{
+			SoundFXManager.Instance.PlaySoundFXClipAtRandomPitch(_jumpSoundFX, transform, 0.25f,0.25f);
 			rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
 			hasJumped = true;
 			hasLanded = false;
-            SoundFXManager.Instance.PlaySoundFXClip(_jumpSound,transform,1f);
 		}
 
 		if (isGrounded && rb.velocity.y < 0)
@@ -415,6 +423,7 @@ public class PlayerMovement : MonoBehaviour
 	private GameObject staminaBarParent;
 	public bool canFly;
 	private bool isFlying;
+	private GameObject flyingSoundObject;
 
 	void Flying()
 	{
@@ -440,8 +449,12 @@ public class PlayerMovement : MonoBehaviour
 
 		rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed); //add velocity for flying
 		isFlying = true;
+		if (flyingSoundObject == null)
+		{
+			flyingSoundObject = SoundFXManager.Instance.PlayLoopingSoundFXClip(_buzzingFX, transform, 0.25f);
+		}
 
-		TurnOnStaminaBar(); // make stamina bar visible
+        TurnOnStaminaBar(); // make stamina bar visible
 
 		DrainStamina();
 	}
