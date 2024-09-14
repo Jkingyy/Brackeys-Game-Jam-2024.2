@@ -11,12 +11,16 @@ public class MenuScreenManager : MonoBehaviour
     [SerializeField] Slider _masterVolumeSlider;
     [SerializeField] Slider _soundFXVolumeSlider;
     [SerializeField] Slider _musicVolumeSlider;
+    [SerializeField] GameObject _background;
+    private Animator animator;
     // Start is called before the first frame update
     void Start()
     {
         _masterVolumeSlider.value = PlayerPrefs.GetFloat("MasterVolume");
         _soundFXVolumeSlider.value = PlayerPrefs.GetFloat("SoundFXVolume");
         _musicVolumeSlider.value = PlayerPrefs.GetFloat("MusicVolume");
+
+        animator = _background.GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -26,5 +30,8 @@ public class MenuScreenManager : MonoBehaviour
         SceneManager.LoadScene(LEVEL_1_SCENE);
     }
 
+    public void ChangeAnimatedBackground(string background){ 
+        animator.Play(background);
+    }
 
 }
