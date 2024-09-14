@@ -4646,13 +4646,14 @@ GameObject:
   - component: {fileID: 1151779527}
   - component: {fileID: 1151779529}
   - component: {fileID: 1151779528}
+  - component: {fileID: 1151779530}
   m_Layer: 5
   m_Name: BG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1151779527
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4715,6 +4716,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1151779526}
   m_CullTransparentMesh: 1
+--- !u!114 &1151779530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1151779526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eeb7c1068cb47c949aae4adf1851fd17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeout: 3
+  hasChanged: 0
 --- !u!1 &1173161585 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7489529049236987962, guid: afd0c2303d93ed847afb188d52e09200,
@@ -8024,6 +8039,7 @@ MonoBehaviour:
   _staminaRecoveryPerSecond: 40
   _staminaBar: {fileID: 315252109}
   staminaBarParent: {fileID: 1151779526}
+  UITimeout: 5
   canFly: 0
   isHurt: 0
 --- !u!50 &1758461475
@@ -8203,7 +8219,6 @@ MonoBehaviour:
   - {fileID: 1316834021}
   - {fileID: 235504257}
   - {fileID: 418938496}
-  UITimeout: 5
 --- !u!114 &1758461484
 MonoBehaviour:
   m_ObjectHideFlags: 0

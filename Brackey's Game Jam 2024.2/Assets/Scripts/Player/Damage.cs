@@ -22,11 +22,12 @@ public class Damage : MonoBehaviour
     private Rigidbody2D rb;
     private Knockback knockback;
     private CameraShake cameraShake;
+    private HealthBarTimeout healthBarTimeout;
     private void Awake() {
         rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponent<PlayerMovement>();
         knockback = GetComponent<Knockback>();
-
+        healthBarTimeout = GetComponentInChildren<HealthBarTimeout>();
         cameraShake = GameObject.FindGameObjectWithTag("Virtual Camera").GetComponent<CameraShake>();
     }
 
@@ -48,9 +49,12 @@ public class Damage : MonoBehaviour
         playerMovement.TurnOnStaminaBar();
         Transform currentWing = HealthWings[currentHealth].transform.GetChild(0);
         currentWing.gameObject.SetActive(false);
+        healthBarTimeout.hasChanged = true;
+
         SoundFXManager.Instance.PlayRandomSoundFXClip(DamageSounds,transform,1f);
         if (currentHealth <= 0){
             GameOver();
+            return;
         }
 
         ApplyKnockback(direction);
@@ -85,11 +89,8 @@ public class Damage : MonoBehaviour
         } else {
             knockback.CallKnockback(direction, Vector2.up, 0);   
         }
-        Invoke("TurnOffStaminaBar", playerMovement.UITimeout);
+        
     }   
-    private void TurnOffStaminaBar(){
-        playerMovement.TurnOffStaminaBar();
-    }
     void GameOver(){
         Time.timeScale = 0;
         GameOverPanel.SetActive(true);
