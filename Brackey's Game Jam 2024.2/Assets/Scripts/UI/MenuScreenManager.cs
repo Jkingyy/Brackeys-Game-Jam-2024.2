@@ -34,4 +34,7 @@ public class MenuScreenManager : MonoBehaviour
         animator.Play(background);
     }
 
+    public void OpenURl(string url){
+        Application.OpenURL(url);
+    }
 }
