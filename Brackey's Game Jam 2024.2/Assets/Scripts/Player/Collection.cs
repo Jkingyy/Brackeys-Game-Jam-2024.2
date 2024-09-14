@@ -6,6 +6,8 @@ using TMPro;
 public class Collection : MonoBehaviour
 {
     [SerializeField] TMP_Text _collectionText;
+    [SerializeField] AudioClip _collectionFX;
+
 
     private int collectionCount;
     // Start is called before the first frame update
@@ -27,6 +29,7 @@ public class Collection : MonoBehaviour
             collectionCount++;
             UpdateUI();
             Destroy(other.gameObject);
+            SoundFXManager.Instance.PlaySoundFXClipAtRandomPitch(_collectionFX, transform, 0.25f, 0.25f);
         }
     }
 
