@@ -7176,13 +7176,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1733084140}
   m_CullTransparentMesh: 1
-
---- !u!198 &1742087633 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 8148054634845334856, guid: a2b7f3f082d3e2245a047a8dd97cc829,
-    type: 3}
-  m_PrefabInstance: {fileID: 1660453628}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1752421190
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7275,7 +7268,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1173161586}
   m_SourcePrefab: {fileID: 100100000, guid: afd0c2303d93ed847afb188d52e09200, type: 3}
-
 --- !u!1 &1758461473
 GameObject:
   m_ObjectHideFlags: 0
@@ -7327,22 +7319,17 @@ MonoBehaviour:
   _jumpSpeed: 14
   _fallSpeed: 10
   _jumpVelocityFalloff: 10
-  _jumpSoundFX: {fileID: 0}
-  _buzzingFX: {fileID: 0}
-  _collectionFX: {fileID: 0}
+  _jumpSoundFX: {fileID: 8300000, guid: 35f3b3c84c89d1d4182e90c28f988772, type: 3}
+  _buzzingFX: {fileID: 8300000, guid: 64e86ae90c43bd34b94ddfe8e6ede9ba, type: 3}
   _playerCanWallJump: 1
   _wallMask:
     serializedVersion: 2
     m_Bits: 200
   _wallCheck: {fileID: 1979469155}
   _wallSlideSpeed: 8
-  isWallSliding: 0
-  isWallClimbing: 0
-  isWallGrabbing: 0
   _wallJumpingTime: 0.2
   _wallJumpingDuration: 0.2
   _wallJumpingPower: {x: 8, y: 16}
-  isWallJumping: 0
   _playerHasDashAbility: 1
   _dashPower: 45
   _dashDuration: 0.2
@@ -7414,7 +7401,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _collectionText: {fileID: 1904574580}
-  _collectionFX: {fileID: 0}
+  _collectionFX: {fileID: 8300000, guid: 395b7146d3d046b4ba7261380103702e, type: 3}
 --- !u!70 &1758461481
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -7522,6 +7509,11 @@ MonoBehaviour:
   CameraShakeTime: 0.5
   VerticalKnockback: 10
   HorizontalKnockback: 10
+  DamageSounds:
+  - {fileID: 8300000, guid: 31f3428d2d7331b48b21dfec7c91e76a, type: 3}
+  - {fileID: 8300000, guid: 9788b25a0f24ec648936c10dfd8ff7bb, type: 3}
+  - {fileID: 8300000, guid: e5fd29522406e7d49a006fc9fd52d3f6, type: 3}
+  - {fileID: 8300000, guid: 67471d1e0588abe4b8c4a904de8a2985, type: 3}
 --- !u!114 &1758461484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7777,6 +7769,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5656624351977350017, guid: aa4da1aa3b6c9904cb6b904f3efa5e2d,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1758461478}
     - target: {fileID: 7426865556851087011, guid: aa4da1aa3b6c9904cb6b904f3efa5e2d,
         type: 3}
       propertyPath: m_Name
@@ -9053,6 +9050,5 @@ SceneRoots:
   - {fileID: 290808260}
   - {fileID: 29216481}
   - {fileID: 1851807420018975414}
-
   - {fileID: 1835069436}
-
+  - {fileID: 1752421190}

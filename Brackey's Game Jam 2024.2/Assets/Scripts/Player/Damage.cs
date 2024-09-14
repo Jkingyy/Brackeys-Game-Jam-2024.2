@@ -12,6 +12,8 @@ public class Damage : MonoBehaviour
     [SerializeField] float CameraShakeTime;
     [SerializeField] float VerticalKnockback;
     [SerializeField] float HorizontalKnockback;
+    [SerializeField] AudioClip[] DamageSounds;
+
     private int currentHealth;
 
     private float invincibilityTimeCounter;
@@ -43,7 +45,7 @@ public class Damage : MonoBehaviour
         if(invincibilityTimeCounter > 0)return;
 
         currentHealth -= damage;
-        
+        SoundFXManager.Instance.PlayRandomSoundFXClip(DamageSounds,transform,1f);
         if (currentHealth <= 0){
             GameOver();
         }

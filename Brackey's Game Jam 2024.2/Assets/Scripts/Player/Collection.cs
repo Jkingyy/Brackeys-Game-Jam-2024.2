@@ -29,7 +29,7 @@ public class Collection : MonoBehaviour
             collectionCount++;
             UpdateUI();
             Destroy(other.gameObject);
-            SoundFXManager.Instance.PlaySoundFXClipAtRandomPitch(_collectionFX, transform, 0.25f, 0.25f);
+            SoundFXManager.Instance.PlaySoundFXClipAtRandomPitch(_collectionFX, transform, 0.5f, 0.25f);
         }
     }
 
