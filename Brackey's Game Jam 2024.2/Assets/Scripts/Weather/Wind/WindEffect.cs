@@ -14,14 +14,17 @@ public class WindEffect : MonoBehaviour
 	[SerializeField] ParticleSystem[] windParticleSystems;
 	private int windDirection;
 	private float windSpeed;
+	[SerializeField] float windForceMultiplier = 100f;
 	[SerializeField] private Collider2D windZoneCollider;
 	private WindZone windZone;
 	private bool effectEnabled;
+	[SerializeField] PlayerMovement playerMovement;
 	
 	public delegate void WindEffectToggler(bool active);
 	public static event WindEffectToggler OnWindEffectToggled;
 	void Awake()
 	{
+		if (!playerMovement) Debug.LogError("WindEffect: PlayerMovement not set.");
 		if (!windZoneCollider) Debug.LogError("WindEffect: WindZoneCollider not set.");
 		windZoneCollider.isTrigger = true;
 		windZoneCollider.enabled = false;
@@ -45,12 +48,15 @@ public class WindEffect : MonoBehaviour
 	/// <summary>
 	/// While the wind zone is active and the player is inside it, apply a force to the player in the wind direction with the set wind speed.
 	/// </summary>
-	/// <param name="other"></param>
-	private void ApplyWindForceToPlayer(Collider2D other)
+	/// <param name="collider2D"></param>
+	private void ApplyWindForceToPlayer(Collider2D collider2D)
 	{
-		if (effectEnabled && other.TryGetComponent<Rigidbody2D>(out var rb)) 
+		if (collider2D.gameObject == playerMovement.gameObject &&
+		playerMovement.GetIsWallJumping() || playerMovement.GetIsDashing()) return;
+		
+		if (effectEnabled && collider2D.TryGetComponent<Rigidbody2D>(out var rb)) 
 		{
-			rb.AddForce(new Vector2(windDirection, 0) * (windSpeed * 200), ForceMode2D.Force);
+			rb.AddForce(new Vector2(windDirection, 0) * (windSpeed * windForceMultiplier), ForceMode2D.Force);
 		}
 	}
 	

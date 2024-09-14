@@ -5,8 +5,8 @@ using UnityEngine.UI;
 public class PlayerMovement : MonoBehaviour
 {
 	private Rigidbody2D rb;
-
-	private bool isRainingIntensely = false;
+	[SerializeField] float maxHorizontalSpeed = 30f;
+	[SerializeField] bool isRainingIntensely = false;
 	public void ToggleRainIntensity()
 	{
 		isRainingIntensely = !isRainingIntensely;
@@ -40,6 +40,7 @@ public class PlayerMovement : MonoBehaviour
 	// Update is called once per frame
 	private void Update()
 	{
+		rb.velocity = new Vector2(Mathf.Clamp(rb.velocity.x, -maxHorizontalSpeed, maxHorizontalSpeed), rb.velocity.y);
 		// Handle player movement functions 
 		Grounded();
 		//Animations();
@@ -53,6 +54,7 @@ public class PlayerMovement : MonoBehaviour
 		Walking();
 		Dashing();
 		Flying();
+		
 	}
 
 
@@ -343,6 +345,11 @@ public class PlayerMovement : MonoBehaviour
 	{
 		isWallJumping = false;
 	}
+	
+	public bool GetIsWallJumping()
+	{
+		return isWallJumping;
+	}
 	#endregion
 
 	#region Dashing
@@ -385,6 +392,11 @@ public class PlayerMovement : MonoBehaviour
 
 		yield return new WaitForSeconds(_dashCooldown); // Wait for the dash cooldown to end
 		canDash = true; // Allow the player to dash again
+	}
+	
+	public bool GetIsDashing()
+	{
+		return isDashing;
 	}
 	#endregion
 
