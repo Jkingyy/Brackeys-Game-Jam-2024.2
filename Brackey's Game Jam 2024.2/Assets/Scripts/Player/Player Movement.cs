@@ -227,16 +227,16 @@ public class PlayerMovement : MonoBehaviour
 
 	[Header("Wall Movement Settings")]
 	[SerializeField] private float _wallSlideSpeed = 2f; // Speed of sliding down a wall
-	private bool isWallSliding; // Flag indicating if the player is sliding down a wall
-	private bool isWallClimbing; // Flag indicating if the player is climbing up a wall
-	private bool isWallGrabbing; // Flag indicating if the player is holding onto a wall
+	public bool isWallSliding; // Flag indicating if the player is sliding down a wall
+	public bool isWallClimbing; // Flag indicating if the player is climbing up a wall
+	public bool isWallGrabbing; // Flag indicating if the player is holding onto a wall
 
 	[Header("Wall Jump Settings")]
 	[SerializeField] private float _wallJumpingTime = 0.2f;
 	[SerializeField] private float _wallJumpingDuration = 0.2f;
 	[SerializeField] private Vector2 _wallJumpingPower = new Vector2(8f, 16f);
 
-	private bool isWallJumping; // Flag indicating if the player is wall jumping
+	public bool isWallJumping; // Flag indicating if the player is wall jumping
 	private float wallJumpingDir;
 	private float wallJumpingCounter;
 
