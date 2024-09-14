@@ -37,7 +37,6 @@ public class LightningFlash : MonoBehaviour
 		if (Random.value < playChance) PlayLightningFlash();
 
 		// Wait for the particle system's duration
-		print("Waiting for " + ps.main.startLifetime.constantMax + " seconds.");
 		yield return new WaitForSeconds(ps.main.startLifetime.constantMax);
 
 		// After waiting, check again in the next Update cycle
@@ -46,7 +45,6 @@ public class LightningFlash : MonoBehaviour
 
 	void PlayLightningFlash()
 	{
-		print("Playing lightning flash!");
 		// Play the animation using the trigger
 		lightAnimator.Play(animationName);
 	}

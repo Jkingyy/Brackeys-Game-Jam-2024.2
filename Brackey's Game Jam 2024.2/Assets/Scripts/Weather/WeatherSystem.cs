@@ -8,10 +8,18 @@ public class WeatherSystem : MonoBehaviour
 	public WeatherTimer weatherTimer;
 	public WeatherState weatherState;
 	public WeatherEffects weatherEffects;
+	
+	void Awake()
+	{
+		if (weatherTimer == null) weatherTimer = GetComponent<WeatherTimer>();
+		if (weatherState == null) weatherState = GetComponent<WeatherState>();
+		if (weatherEffects == null) weatherEffects = GetComponent<WeatherEffects>();
+	}
 
 	void OnEnable()
 	{
 		weatherTimer.OnTimerExpired += HandleTimerExpired;
+		weatherState.OnWeatherChanged += HandleWeatherChanged;
 	}
 
 	void OnDisable()
@@ -21,14 +29,11 @@ public class WeatherSystem : MonoBehaviour
 
 	private void HandleTimerExpired()
 	{
-		// Change to the next weather state
 		weatherState.CycleWeatherState();
-		
-		// Reset the timer for the next weather state duration
-		int nextStateIndex = weatherState.GetNextWeatherStateIndex();
-		weatherTimer.SetTimer(nextStateIndex);
-		
-		// Activate the particle effect for the new weather state
-		weatherEffects.ActivateWeatherEffect(weatherState.GetCurrentWeatherState());
+	}
+	
+	private void HandleWeatherChanged(WeatherState.State state)
+	{
+		weatherEffects.SetWeatherEffect(state);
 	}
 }
