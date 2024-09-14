@@ -41,7 +41,7 @@ AudioSource:
   m_GameObject: {fileID: 3721394564930818106}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 6364392608999813079, guid: a9ffad34112067949be25e976fec502c,
+  OutputAudioMixerGroup: {fileID: -6681407440818518794, guid: 6d99bc3012164c6449a1a1a6bf14bce1,
     type: 2}
   m_audioClip: {fileID: 8300000, guid: 039dc6a8dcc9c9c4b93a1cd39410c7e3, type: 3}
   m_PlayOnAwake: 1
@@ -170,7 +170,7 @@ AudioSource:
   m_GameObject: {fileID: 4269253171811490379}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: -7504122518750771707, guid: a9ffad34112067949be25e976fec502c,
+  OutputAudioMixerGroup: {fileID: 7176025377789372087, guid: 6d99bc3012164c6449a1a1a6bf14bce1,
     type: 2}
   m_audioClip: {fileID: 8300000, guid: 117069d98c9d076469fd7743ab8a8259, type: 3}
   m_PlayOnAwake: 1
@@ -304,7 +304,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   drumAndBassSource: {fileID: 0}
   leadSynthSource: {fileID: 0}
-  audioMixer: {fileID: 24100000, guid: a9ffad34112067949be25e976fec502c, type: 2}
+  audioMixer: {fileID: 24100000, guid: 6d99bc3012164c6449a1a1a6bf14bce1, type: 2}
   player: {fileID: 0}
   minSpeed: 0
   maxSpeed: 10
