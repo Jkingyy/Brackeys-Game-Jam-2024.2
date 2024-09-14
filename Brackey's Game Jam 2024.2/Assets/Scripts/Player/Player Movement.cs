@@ -6,8 +6,8 @@ public class PlayerMovement : MonoBehaviour
 {
 
 	private Rigidbody2D rb;  
-  private Knockback knockback;
-  
+  	private Knockback knockback;
+	private HealthBarTimeout healthBarTimeout;
 	[SerializeField] float maxHorizontalSpeed = 30f;
 	[SerializeField] bool isRainingIntensely = false;
 	public void ToggleRainIntensity()
@@ -20,7 +20,8 @@ public class PlayerMovement : MonoBehaviour
 	{
 		// Get the components attached to the GameObject
 		rb = GetComponent<Rigidbody2D>();
-    knockback = GetComponent<Knockback>();
+    	knockback = GetComponent<Knockback>();
+		healthBarTimeout = GetComponentInChildren<HealthBarTimeout>();
 
 	}
 	private void OnEnable()
@@ -39,6 +40,7 @@ public class PlayerMovement : MonoBehaviour
 	{
 		originalGravityScale = rb.gravityScale;
 		currentStamina = _maxFlyingStamina;
+		
 	}
 	// Update is called once per frame
 	private void Update()
@@ -486,7 +488,6 @@ public class PlayerMovement : MonoBehaviour
 		if (currentStamina > _maxFlyingStamina)
 		{
 			currentStamina = _maxFlyingStamina;
-			Invoke("TurnOffStaminaBar", UITimeout); 
 		}
 
 		UpdateStaminaBar();
@@ -503,6 +504,7 @@ public class PlayerMovement : MonoBehaviour
 	void UpdateStaminaBar()
 	{
 		_staminaBar.fillAmount = currentStamina / _maxFlyingStamina;
+		healthBarTimeout.hasChanged = true;
 	}
 
 	public void TurnOffStaminaBar()
