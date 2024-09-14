@@ -136,7 +136,7 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private float _fallSpeed = 7; // Speed of falling
 	[SerializeField] private float _jumpVelocityFalloff = 8; // Rate of decrease in jump velocity
 
-
+    [SerializeField] private AudioClip _jumpSound;
 	private int numberOfJumps = 1; // Number of jumps the player can perform
 	private int jumpsRemaining; // Number of jumps remaining
 	private float jumpBufferCounter; // Counter for jump buffer time
@@ -174,6 +174,7 @@ public class PlayerMovement : MonoBehaviour
 			rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
 			hasJumped = true;
 			hasLanded = false;
+            SoundFXManager.Instance.PlaySoundFXClip(_jumpSound,transform,1f);
 		}
 
 		if (isGrounded && rb.velocity.y < 0)

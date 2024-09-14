@@ -1337,12 +1337,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 64904ab959bb9e944a9cb194d153a950, type: 3}
---- !u!198 &508977860 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 4604167966173150924, guid: 64904ab959bb9e944a9cb194d153a950,
-    type: 3}
-  m_PrefabInstance: {fileID: 508977859}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &516598771
 GameObject:
   m_ObjectHideFlags: 0
@@ -2364,6 +2358,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41bee6c4afdaf2e48a018b75b239de05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timer: 0
   timesForWeatherStates:
   - 5
   - 5
@@ -2384,12 +2379,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a8308e9fb8b5cb4d8ba9cbd04d40d2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWeatherEffect: {fileID: 840922615}
-  rain: {fileID: 508977860}
-  wind: {fileID: 1742087633}
-  lightning: {fileID: 840922615}
-  sunny: {fileID: 840922615}
-  cloudy: {fileID: 840922615}
+  sunnyWeatherParameters:
+    cloudColor: {r: 1, g: 1, b: 1, a: 1}
+    cloudEmissionRate: 0
+    rainEmissionRate: 0
+    windSpeed: 0
+    lightningActive: 0
+    sunRaysActive: 1
+  cloudyWeatherParameters:
+    cloudColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    cloudEmissionRate: 25
+    rainEmissionRate: 0
+    windSpeed: 0.75
+    lightningActive: 0
+    sunRaysActive: 0
+  windyWeatherParameters:
+    cloudColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+    cloudEmissionRate: 25
+    rainEmissionRate: 0
+    windSpeed: 1
+    lightningActive: 0
+    sunRaysActive: 0
+  rainyWeatherParameters:
+    cloudColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    cloudEmissionRate: 35
+    rainEmissionRate: 75
+    windSpeed: 1.25
+    lightningActive: 0
+    sunRaysActive: 0
+  stormyWeatherParameters:
+    cloudColor: {r: 0.75, g: 0.75, b: 0.75, a: 1}
+    cloudEmissionRate: 35
+    rainEmissionRate: 150
+    windSpeed: 1.5
+    lightningActive: 1
+    sunRaysActive: 0
+  player: {fileID: 0}
+  sunnyEffect: {fileID: 0}
+  cloudEffect: {fileID: 0}
+  windEffect: {fileID: 0}
+  rainEffect: {fileID: 0}
+  lightningEffect: {fileID: 0}
 --- !u!114 &737166957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2846,12 +2876,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 120ad18fc553ff143b2da44b4db318e2, type: 3}
---- !u!198 &840922615 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 3001444037446695075, guid: 120ad18fc553ff143b2da44b4db318e2,
-    type: 3}
-  m_PrefabInstance: {fileID: 840922614}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &860772885
 GameObject:
   m_ObjectHideFlags: 0
@@ -4691,9 +4715,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79c2b507dc1872b4f8cf1b98ecc26326, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weatherStateText: {fileID: 1395541149}
+  weatherTimerText: {fileID: 0}
   weatherTimer: {fileID: 737166955}
+  weatherEffects: {fileID: 0}
   timer: 0
+  windDirectionIcon: {fileID: 0}
+  windDirectionLeft: {fileID: 0}
+  windDirectionRight: {fileID: 0}
+  windSpeedText: {fileID: 0}
 --- !u!114 &1395541149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6247,12 +6276,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1733084140}
   m_CullTransparentMesh: 1
---- !u!198 &1742087633 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 8148054634845334856, guid: a2b7f3f082d3e2245a047a8dd97cc829,
-    type: 3}
-  m_PrefabInstance: {fileID: 1660453628}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1758461473
 GameObject:
   m_ObjectHideFlags: 0
@@ -6286,7 +6309,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e7e5f8071562994c8ce587806c943a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isRaining: 0
+  maxHorizontalSpeed: 30
+  isRainingIntensely: 0
   _groundMask:
     serializedVersion: 2
     m_Bits: 200
