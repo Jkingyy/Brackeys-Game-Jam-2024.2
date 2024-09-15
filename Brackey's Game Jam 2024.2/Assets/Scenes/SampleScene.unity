@@ -300,37 +300,37 @@ PrefabInstance:
     - target: {fileID: 1179045946512326797, guid: 2cdc011c16a65fb4cb47d3c50bdce5c9,
         type: 3}
       propertyPath: timesForWeatherStates.Array.data[0]
-      value: 10
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 1179045946512326797, guid: 2cdc011c16a65fb4cb47d3c50bdce5c9,
         type: 3}
       propertyPath: timesForWeatherStates.Array.data[1]
-      value: 10
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 1179045946512326797, guid: 2cdc011c16a65fb4cb47d3c50bdce5c9,
         type: 3}
       propertyPath: timesForWeatherStates.Array.data[2]
-      value: 10
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 1179045946512326797, guid: 2cdc011c16a65fb4cb47d3c50bdce5c9,
         type: 3}
       propertyPath: timesForWeatherStates.Array.data[3]
-      value: 10
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 1179045946512326797, guid: 2cdc011c16a65fb4cb47d3c50bdce5c9,
         type: 3}
       propertyPath: timesForWeatherStates.Array.data[4]
-      value: 10
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 1179045946512326797, guid: 2cdc011c16a65fb4cb47d3c50bdce5c9,
         type: 3}
       propertyPath: timesForWeatherStates.Array.data[5]
-      value: 10
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 1179045946512326797, guid: 2cdc011c16a65fb4cb47d3c50bdce5c9,
         type: 3}
       propertyPath: timesForWeatherStates.Array.data[6]
-      value: 10
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 2728233628988743961, guid: 2cdc011c16a65fb4cb47d3c50bdce5c9,
         type: 3}

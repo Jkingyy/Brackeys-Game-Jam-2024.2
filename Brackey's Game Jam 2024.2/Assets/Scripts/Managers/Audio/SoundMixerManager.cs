@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 public class SoundMixerManager : MonoBehaviour
@@ -8,6 +6,7 @@ public class SoundMixerManager : MonoBehaviour
 	// Start is called before the first frame update
 
 	private void Start() {
+		
 	}
 
 	public void SetMasterVolume(float volume)

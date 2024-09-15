@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System;
-using UnityEditor.Callbacks;
 using Unity.Mathematics;
 
 public class Platform : MonoBehaviour
