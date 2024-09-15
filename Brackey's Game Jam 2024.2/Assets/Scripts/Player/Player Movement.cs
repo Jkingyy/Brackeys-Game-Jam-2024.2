@@ -8,7 +8,7 @@ public class PlayerMovement : MonoBehaviour
 	private Rigidbody2D rb;  
   	private Knockback knockback;
 	private HealthBarTimeout healthBarTimeout;
-	[SerializeField] float maxHorizontalSpeed = 30f;
+	[SerializeField] float maxHorizontalSpeed;
 	[SerializeField] bool isRainingIntensely = false;
 	public void ToggleRainIntensity()
 	{
@@ -20,20 +20,23 @@ public class PlayerMovement : MonoBehaviour
 	{
 		// Get the components attached to the GameObject
 		rb = GetComponent<Rigidbody2D>();
-    	knockback = GetComponent<Knockback>();
+		knockback = GetComponent<Knockback>();
 		healthBarTimeout = GetComponentInChildren<HealthBarTimeout>();
 
+		UpdatePlayerStats(0);
 	}
 	private void OnEnable()
 	{
 		RainEffect.OnRainIntensityLimitReached += ToggleRainIntensity;
 		RainEffect.OnRainIntensityDroppedBelowLimit += ToggleRainIntensity;
+		Upgrades.OnUpgrade += UpdatePlayerStats;
 	}
 	
 	private void OnDisable()
 	{
 		RainEffect.OnRainIntensityLimitReached -= ToggleRainIntensity;
 		RainEffect.OnRainIntensityDroppedBelowLimit -= ToggleRainIntensity;
+		Upgrades.OnUpgrade -= UpdatePlayerStats;
 	}
 	
 	private void Start()
@@ -67,6 +70,19 @@ public class PlayerMovement : MonoBehaviour
 		
 	}
 
+	private void UpdatePlayerStats(int upgradeCost)
+	{
+		_jumpSpeed += PlayerPrefs.GetInt("playerJumpSpeed", 0);
+		_wallJumpingPower = new Vector2(_jumpSpeed - 4, 16);
+		_wallJumpingDuration += (float)PlayerPrefs.GetInt("playerJumpSpeed", 0) / 20;
+		
+		_moveSpeed += PlayerPrefs.GetInt("playerSpeed", 0);
+		_sprintSpeed += PlayerPrefs.GetInt("playerSpeed", 0);
+		_flyingSpeed += PlayerPrefs.GetInt("playerSpeed", 0);
+		_dashPower += PlayerPrefs.GetInt("playerSpeed", 0);
+		
+		maxHorizontalSpeed = _dashPower + 5f;
+	}
 
 	#region Ground Check
 
@@ -236,6 +252,8 @@ public class PlayerMovement : MonoBehaviour
 
 	}
 
+	
+	
 	#endregion
 
 	#region Wall Jumping
@@ -245,20 +263,20 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private Transform _wallCheck; // The transform representing the position to check for walls
 	private bool isTouchingWall; // Flag indicating if the player is touching a wall
 
-    [Header("Wall Movement Settings")]
-    [SerializeField] private float _wallSlideSpeed = 2f; // Speed of sliding down a wall
-    private bool isWallSliding; // Flag indicating if the player is sliding down a wall
-    private bool isWallClimbing; // Flag indicating if the player is climbing up a wall
-    private bool isWallGrabbing; // Flag indicating if the player is holding onto a wall
+	[Header("Wall Movement Settings")]
+	[SerializeField] private float _wallSlideSpeed = 2f; // Speed of sliding down a wall
+	private bool isWallSliding; // Flag indicating if the player is sliding down a wall
+	private bool isWallClimbing; // Flag indicating if the player is climbing up a wall
+	private bool isWallGrabbing; // Flag indicating if the player is holding onto a wall
 
 	[Header("Wall Jump Settings")]
 	[SerializeField] private float _wallJumpingTime = 0.2f;
 	[SerializeField] private float _wallJumpingDuration = 0.2f;
-	[SerializeField] private Vector2 _wallJumpingPower = new Vector2(8f, 16f);
+	[SerializeField] private Vector2 _wallJumpingPower;
 
-    private bool isWallJumping; // Flag indicating if the player is wall jumping
-    private float wallJumpingDir;
-    private float wallJumpingCounter;
+	private bool isWallJumping; // Flag indicating if the player is wall jumping
+	private float wallJumpingDir;
+	private float wallJumpingCounter;
 
 	private void WallJumping()
 	{
@@ -282,40 +300,40 @@ public class PlayerMovement : MonoBehaviour
 	private void WallGrab()
 	{
 
-        if (isTouchingWall && !isGrounded && horizontal != 0 && vertical == 0)  // If the player is touching a wall and not grounded and moving horizontally into the wall, hold the wall
-        {
-            rb.velocity = new Vector2(rb.velocity.x, 0);
-            rb.gravityScale = 0;
-            isWallGrabbing = true;
-            TurnOnStaminaBar();
-        }
-        else if (!isTouchingWall || horizontal == 0 || currentStamina <= 0)
-        {
-            rb.gravityScale = originalGravityScale;
-            isWallGrabbing = false;
-            isWallClimbing = false;
-        }
-    }
+		if (isTouchingWall && !isGrounded && horizontal != 0 && vertical == 0)  // If the player is touching a wall and not grounded and moving horizontally into the wall, hold the wall
+		{
+			rb.velocity = new Vector2(rb.velocity.x, 0);
+			rb.gravityScale = 0;
+			isWallGrabbing = true;
+			TurnOnStaminaBar();
+		}
+		else if (!isTouchingWall || horizontal == 0 || currentStamina <= 0)
+		{
+			rb.gravityScale = originalGravityScale;
+			isWallGrabbing = false;
+			isWallClimbing = false;
+		}
+	}
 
 
 
 	private void WallMovement()
 	{
 
-        // If the player is touching a wall and not grounded and moving horizontally into the wall, slide down the wall
-        if (vertical < 0 && isWallGrabbing)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, -_wallSlideSpeed);
-            DrainStamina();
-            isWallClimbing = true;
-        }
-        else if (vertical > 0 && isWallGrabbing)
-        {
-            DrainStamina();
-            rb.velocity = new Vector2(rb.velocity.x, _wallSlideSpeed);
-            isWallClimbing = true;
-        }
-    }
+		// If the player is touching a wall and not grounded and moving horizontally into the wall, slide down the wall
+		if (vertical < 0 && isWallGrabbing)
+		{
+			rb.velocity = new Vector2(rb.velocity.x, -_wallSlideSpeed);
+			DrainStamina();
+			isWallClimbing = true;
+		}
+		else if (vertical > 0 && isWallGrabbing)
+		{
+			DrainStamina();
+			rb.velocity = new Vector2(rb.velocity.x, _wallSlideSpeed);
+			isWallClimbing = true;
+		}
+	}
 
 	private void WallSlide()
 	{
@@ -400,11 +418,11 @@ public class PlayerMovement : MonoBehaviour
 		canDash = false; // Prevent the player from dashing again until the cooldown is over - is set to true in the grounded function
 		isDashing = true; // Sets flag that the player is currently dashing
 
-        rb.gravityScale = 0; // Set gravity to 0 so the player doesn't fall during the dash
-        rb.velocity = new Vector2(transform.localScale.x * _dashPower, 0f); // Apply the dash power to the player
-                                                                            //ChangeAnimationState(PLAYER_DASH);
-
-        yield return new WaitForSeconds(_dashDuration); // Wait for the dash duration to end
+		rb.gravityScale = 0; // Set gravity to 0 so the player doesn't fall during the dash
+		rb.velocity = new Vector2(transform.localScale.x * _dashPower, 0f); // Apply the dash power to the player
+		//ChangeAnimationState(PLAYER_DASH);
+		
+		yield return new WaitForSeconds(_dashDuration); // Wait for the dash duration to end
 
 		rb.gravityScale = originalGravityScale; // Reset the gravity scale
 		isDashing = false;
@@ -517,68 +535,68 @@ public class PlayerMovement : MonoBehaviour
 	{
 		if (staminaBarParent.activeSelf == true) return;
 
-        staminaBarParent.gameObject.SetActive(true);
-    }
-    #endregion
+		staminaBarParent.gameObject.SetActive(true);
+	}
+	#endregion
 
-    #region Animation
+		#region Animation
 
-    //animation states    
-    const string PLAYER_WALK_SMALL = "Player Walk Small";
-    const string PLAYER_RUN_SMALL = "Player Run Small";
-    const string PLAYER_WALK = "Player Walk";
-    const string PLAYER_RUN = "Player Run";
-    const string PLAYER_WALK_LARGE = "Player Walk Large";
-    const string PLAYER_RUN_LARGE = "Player Run Large";
-    const string PLAYER_IDLE = "Player Idle";
-    const string PLAYER_RISE = "Player Jump Rising";
-    const string PLAYER_FALL = "Player Jump Falling";
-    const string PLAYER_DASH = "Player Dash";
-    const string PLAYER_ATTACK = "Player Attack";
-    const string PLAYER_WALLSLIDE = "Player WallSlide";
-    const string PLAYER_HURT = "Player Hurt";
-    const string PLAYER_DEATH = "Player Death";
+	//animation states    
+	const string PLAYER_WALK_SMALL = "Player Walk Small";
+	const string PLAYER_RUN_SMALL = "Player Run Small";
+	const string PLAYER_WALK = "Player Walk";
+	const string PLAYER_RUN = "Player Run";
+	const string PLAYER_WALK_LARGE = "Player Walk Large";
+	const string PLAYER_RUN_LARGE = "Player Run Large";
+	const string PLAYER_IDLE = "Player Idle";
+	const string PLAYER_RISE = "Player Jump Rising";
+	const string PLAYER_FALL = "Player Jump Falling";
+	const string PLAYER_DASH = "Player Dash";
+	const string PLAYER_ATTACK = "Player Attack";
+	const string PLAYER_WALLSLIDE = "Player WallSlide";
+	const string PLAYER_HURT = "Player Hurt";
+	const string PLAYER_DEATH = "Player Death";
 
 
-    private bool isDead = false;
-    public bool isHurt = false;
-    private Animator animator;
-    private string currentState;
+	private bool isDead = false;
+	public bool isHurt = false;
+	private Animator animator;
+	private string currentState;
 
-    private void Animations()
-    {
-        if (isHurt || isDead)
-        {
-            return;
-        }
-        GroundAnims();
-        WallAnims();
-        AirAnims();
+	private void Animations()
+	{
+		if (isHurt || isDead)
+		{
+			return;
+		}
+		GroundAnims();
+		WallAnims();
+		AirAnims();
 
-    }
+	}
 
-    private void GroundAnims()
-    {
-        if (!isGrounded) return;
-        if (isDashing) return;
+	private void GroundAnims()
+	{
+		if (!isGrounded) return;
+		if (isDashing) return;
 
-        if (horizontal != 0)
-        {
-            if (Input.GetButton("Sprint"))
-            {
-                //ChangeAnimationState(PLAYER_RUN);
+		if (horizontal != 0)
+		{
+			if (Input.GetButton("Sprint"))
+			{
+				//ChangeAnimationState(PLAYER_RUN);
 
-            }
-            else
-            {
-                //ChangeAnimationState(PLAYER_WALK);                
-            }
-        }
-        else
-        {
-            //ChangeAnimationState(PLAYER_IDLE);
-        }
-    }
+			}
+			else
+			{
+				//ChangeAnimationState(PLAYER_WALK);                
+			}
+		}
+		else
+		{
+			//ChangeAnimationState(PLAYER_IDLE);
+		}
+	}
 
     private void AirAnims()
     {
@@ -586,15 +604,15 @@ public class PlayerMovement : MonoBehaviour
         if (isTouchingWall) return;
         if (isDashing) return;
 
-        if (rb.velocity.y > 0)
-        {
-            //ChangeAnimationState(PLAYER_RISE);
-        }
-        else
-        {
-            //ChangeAnimationState(PLAYER_FALL);
-        }
-    }
+		if (rb.velocity.y > 0)
+		{
+			//ChangeAnimationState(PLAYER_RISE);
+		}
+		else
+		{
+			//ChangeAnimationState(PLAYER_FALL);
+		}
+	}
 
     private void WallAnims()
     {
@@ -623,41 +641,41 @@ public class PlayerMovement : MonoBehaviour
         }
 
 
-    }
+	}
 
-    public void PlayHurtAnim()
-    {
-        //ChangeAnimationState(PLAYER_HURT);
-        isHurt = true;
-    }
-    public void PlayDeathAnim()
-    {
-        //ChangeAnimationState(PLAYER_DEATH);
-        isDead = true;
-    }
-    private void HurtAnimFinished()
-    {
-        Debug.Log("Hurt anim finished");
-        isHurt = false;
-    }
-    private void DeathAnimFinished()
-    {
-        gameObject.SetActive(false);
-    }
+	public void PlayHurtAnim()
+	{
+		//ChangeAnimationState(PLAYER_HURT);
+		isHurt = true;
+	}
+	public void PlayDeathAnim()
+	{
+		//ChangeAnimationState(PLAYER_DEATH);
+		isDead = true;
+	}
+	private void HurtAnimFinished()
+	{
+		Debug.Log("Hurt anim finished");
+		isHurt = false;
+	}
+	private void DeathAnimFinished()
+	{
+		gameObject.SetActive(false);
+	}
 
 
 
-    void ChangeAnimationState(string newState)
-    {
-        //stop the same animation from interrupting itself
-        if (currentState == newState) return;
+	void ChangeAnimationState(string newState)
+	{
+		//stop the same animation from interrupting itself
+		if (currentState == newState) return;
 
-        //play the animation
-        animator.Play(newState);
+		//play the animation
+		animator.Play(newState);
 
-        //reassign the current state
-        currentState = newState;
-    }
+		//reassign the current state
+		currentState = newState;
+	}
 
-    #endregion
+	#endregion
 }

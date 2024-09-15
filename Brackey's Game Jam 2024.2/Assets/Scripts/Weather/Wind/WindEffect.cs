@@ -114,7 +114,8 @@ public class WindEffect : MonoBehaviour
 			main.simulationSpeed = speed;
 		}
 		
-		if (speed >= 1) OnWindEffectToggled?.Invoke(true);
+		float windEffectResistance = 1 + (PlayerPrefs.GetInt("playerWindResistance", 0) * 0.1f);
+		if (speed >= windEffectResistance) OnWindEffectToggled?.Invoke(true);
 		else OnWindEffectToggled?.Invoke(false);
 	}
 	
