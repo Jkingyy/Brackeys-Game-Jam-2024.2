@@ -4,7 +4,9 @@ using UnityEngine.UI;
 
 public class MenuScreenManager : MonoBehaviour
 {   
-	const string LEVEL_1_SCENE = "SampleScene";
+
+    const string LEVEL_1_SCENE = "Level";
+
 
 	[SerializeField] Slider _masterVolumeSlider;
 	[SerializeField] Slider _soundFXVolumeSlider;
