@@ -571,6 +571,7 @@ public class PlayerMovement : MonoBehaviour
 		if (staminaBarParent.activeSelf == true) return;
 
 		staminaBarParent.gameObject.SetActive(true);
+		healthBarTimeout.hasChanged = true;
 	}
 	#endregion
 	
@@ -793,7 +794,6 @@ public class PlayerMovement : MonoBehaviour
 
 		//reassign the current state
 		currentState = newState;
-		print(currentState);
 	}
 
 	#endregion

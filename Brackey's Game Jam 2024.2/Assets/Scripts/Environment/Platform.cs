@@ -6,7 +6,8 @@ using Unity.Mathematics;
 
 public class Platform : MonoBehaviour
 {
-    public bool isRaining = false;
+
+    [SerializeField] bool isRainingIntensely = false;
     [Header("Growing Settings")]
     [SerializeField] Vector2 growthSize;
     [SerializeField] float growthSteps; // amount grow calls in the coroutine
@@ -59,6 +60,17 @@ public class Platform : MonoBehaviour
         InstantiatePositionMarkers();
         AddMarkerPositionsToLineRenderer();
     }
+    	private void OnEnable()
+	{
+		RainEffect.OnRainIntensityLimitReached += ToggleRainIntensity;
+		RainEffect.OnRainIntensityDroppedBelowLimit += ToggleRainIntensity;
+	}
+	
+	private void OnDisable()
+	{
+		RainEffect.OnRainIntensityLimitReached -= ToggleRainIntensity;
+		RainEffect.OnRainIntensityDroppedBelowLimit -= ToggleRainIntensity;
+	}
 
     // Update is called once per frame
     void FixedUpdate()
@@ -69,21 +81,28 @@ public class Platform : MonoBehaviour
 
     #region Growth
 
+    public void ToggleRainIntensity()
+	{
+		isRainingIntensely = !isRainingIntensely;
+	}
+
+
     void HandleGrowth()
     {
         if (!CanGrow) return;
         if (_isChangingSize) return;
 
-        if (isRaining && _currentSize == _originalSize)
+        if (isRainingIntensely && _currentSize == _originalSize)
         { //if its raining and Platform hasnt grown
 
             Vector2 change = (growthSize - _currentSize) / growthSteps;
             _isChangingSize = true;
             _coroutine = ChangeSize(change, true);
+
             StartCoroutine(_coroutine);
 
         }
-        else if (!isRaining && _currentSize == growthSize)
+        else if (!isRainingIntensely && _currentSize == growthSize)
         { //if its not raining and the platform hasnt shrunk
             Vector2 change = (_originalSize - _currentSize) / growthSteps;
             _isChangingSize = true;
@@ -115,6 +134,7 @@ public class Platform : MonoBehaviour
             _currentSize = _originalSize;
             _isGrown = false;
             _col.enabled = false;
+            
         }
 
         _sr.size = _currentSize;
