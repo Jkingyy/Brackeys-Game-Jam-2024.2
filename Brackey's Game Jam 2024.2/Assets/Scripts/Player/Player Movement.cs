@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 	private HealthBarTimeout healthBarTimeout;
 	[SerializeField] float maxHorizontalSpeed;
 	[SerializeField] bool isRainingIntensely = false;
+	[SerializeField] Damage playerDamage;
 	public void ToggleRainIntensity()
 	{
 		isRainingIntensely = !isRainingIntensely;
@@ -22,6 +23,7 @@ public class PlayerMovement : MonoBehaviour
 		rb = GetComponent<Rigidbody2D>();
 		knockback = GetComponent<Knockback>();
 		healthBarTimeout = GetComponentInChildren<HealthBarTimeout>();
+		playerDamage = GetComponent<Damage>();
 
 		UpdatePlayerStats(0);
 	}
@@ -53,7 +55,7 @@ public class PlayerMovement : MonoBehaviour
 		Grounded();
 		//Animations();
 
-    if (knockback.IsBeingKnockedBack) return;
+	if (knockback.IsBeingKnockedBack) return;
 		if (isDashing) return;
 
 		WallJumping();
@@ -67,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
 			Destroy(flyingSoundObject);
 			flyingSoundObject = null;
 		}
+		Falling();
 		
 	}
 
@@ -121,15 +124,23 @@ public class PlayerMovement : MonoBehaviour
 		horizontal = Input.GetAxisRaw("Horizontal");
 		vertical = Input.GetAxisRaw("Vertical");
 
+		if (isGrounded && horizontal == 0 && !hasJumped && !isHurt && !(playerDamage.GetInvincibilityTimeCounter() > 0))
+		{
+			SetPlayerState(PlayerState.Idle);
+		}
+		
 		// Adjust velocity based on sprint input
 		if (Input.GetButton("Sprint"))
 		{
 			rb.velocity = new Vector2(horizontal * _sprintSpeed, rb.velocity.y);
+			if (isGrounded && horizontal != 0) SetPlayerState(PlayerState.Run);
 		}
 		else
 		{
 			rb.velocity = new Vector2(horizontal * _moveSpeed, rb.velocity.y);
+			if (isGrounded&& horizontal != 0) SetPlayerState(PlayerState.Walk);
 		}
+		
 
 		// Flip the player sprite if necessary
 		if (horizontal > 0 && !facingRight)
@@ -167,6 +178,7 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] private float _jumpSpeed = 12; // Height of the jump
 	[SerializeField] private float _fallSpeed = 7; // Speed of falling
 	[SerializeField] private float _jumpVelocityFalloff = 8; // Rate of decrease in jump velocity
+	[SerializeField] private bool hasPeaked; // Flag indicating if the player has reached the peak of the jump
 	[SerializeField] AudioClip _jumpSoundFX;
   [SerializeField] AudioClip _buzzingFX;
 
@@ -177,8 +189,8 @@ public class PlayerMovement : MonoBehaviour
 	private float jumpBufferCounter; // Counter for jump buffer time
 	private float coyoteTimeCounter; // Counter for coyote time
 
-	private bool hasJumped; // Flag indicating if the player has initiated a jump for animations
-	private bool hasLanded; // Flag indicating if the player has initiated a jump for animations
+	[SerializeField] private bool hasJumped; // Flag indicating if the player has initiated a jump for animations
+	[SerializeField] private bool hasLanded; // Flag indicating if the player has initiated a jump for animations
 
 	// Handle player jumping
 	private void Jumping()
@@ -211,6 +223,11 @@ public class PlayerMovement : MonoBehaviour
 			hasJumped = true;
 			hasLanded = false;
 		}
+		
+		if (hasJumped && !hasPeaked && rb.velocity.y <= 0)
+		{
+			hasPeaked = true;
+		}
 
 		if (isGrounded && rb.velocity.y < 0)
 		{
@@ -218,9 +235,13 @@ public class PlayerMovement : MonoBehaviour
 			if (!hasLanded)
 			{
 				hasLanded = true;
+				jumpsRemaining = numberOfJumps;
+				_playerCanDoubleJump = true;
 			}
+			hasPeaked = false;
 		}
 
+		if (!isGrounded && hasJumped && !isFalling && !isWallGrabbing && !isWallSliding && !isFlying) SetPlayerState(PlayerState.Jump);
 
 		if (Input.GetButtonUp("Jump"))
 		{
@@ -248,6 +269,8 @@ public class PlayerMovement : MonoBehaviour
 		{
 			rb.velocity = new Vector2(rb.velocity.x, _jumpSpeed);
 			jumpsRemaining--;
+			if (jumpsRemaining == 0) _playerCanDoubleJump = false;
+			SetPlayerState(PlayerState.DoubleJump);
 		}
 
 	}
@@ -286,7 +309,7 @@ public class PlayerMovement : MonoBehaviour
 
 
 		if (!isRainingIntensely)
-		{ //MyPing0 - This swaps the player movement from grabbing and climbing walls to sliding and jumping from them
+		{ //This swaps the player movement from grabbing and climbing walls to sliding and jumping from them
 			WallGrab();
 			WallMovement();
 		}
@@ -305,6 +328,7 @@ public class PlayerMovement : MonoBehaviour
 			rb.velocity = new Vector2(rb.velocity.x, 0);
 			rb.gravityScale = 0;
 			isWallGrabbing = true;
+			SetPlayerState(PlayerState.WallGrab);
 			TurnOnStaminaBar();
 		}
 		else if (!isTouchingWall || horizontal == 0 || currentStamina <= 0)
@@ -326,12 +350,14 @@ public class PlayerMovement : MonoBehaviour
 			rb.velocity = new Vector2(rb.velocity.x, -_wallSlideSpeed);
 			DrainStamina();
 			isWallClimbing = true;
+			SetPlayerState(PlayerState.WallClimb);
 		}
 		else if (vertical > 0 && isWallGrabbing)
 		{
 			DrainStamina();
 			rb.velocity = new Vector2(rb.velocity.x, _wallSlideSpeed);
 			isWallClimbing = true;
+			SetPlayerState(PlayerState.WallClimb);
 		}
 	}
 
@@ -342,6 +368,7 @@ public class PlayerMovement : MonoBehaviour
 		{
 			rb.velocity = new Vector2(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -_wallSlideSpeed, float.MaxValue));
 			isWallSliding = true;
+			SetPlayerState(PlayerState.WallSlide);
 		}
 		else
 		{
@@ -367,6 +394,7 @@ public class PlayerMovement : MonoBehaviour
 		if (Input.GetButtonDown("Jump") && wallJumpingCounter > 0)
 		{
 			isWallJumping = true;
+			SetPlayerState(PlayerState.WallJump);
 			rb.velocity = new Vector2(wallJumpingDir * _wallJumpingPower.x, _wallJumpingPower.y);
 			wallJumpingCounter = 0;
 			if (transform.localScale.x != wallJumpingDir)
@@ -417,6 +445,7 @@ public class PlayerMovement : MonoBehaviour
 
 		canDash = false; // Prevent the player from dashing again until the cooldown is over - is set to true in the grounded function
 		isDashing = true; // Sets flag that the player is currently dashing
+		SetPlayerState(PlayerState.Dash);
 
 		rb.gravityScale = 0; // Set gravity to 0 so the player doesn't fall during the dash
 		rb.velocity = new Vector2(transform.localScale.x * _dashPower, 0f); // Apply the dash power to the player
@@ -452,7 +481,7 @@ public class PlayerMovement : MonoBehaviour
 
 	float currentStamina;
 	public bool canFly;
-	private bool isFlying;
+	[SerializeField] private bool isFlying;
 	private GameObject flyingSoundObject;
 
 	void Flying()
@@ -468,23 +497,29 @@ public class PlayerMovement : MonoBehaviour
 
 			return;
 		}
-		if (!canFly) return; // if cant fly eg. no stamina/player is in the storm return
 		if (!Input.GetButton("Jump")) return; // if not holding the fly button return
-		if (currentStamina <= 0)
+		
+		if (currentStamina <= 0 || (hasJumped && !hasPeaked) || isWallClimbing || isWallGrabbing || isWallSliding) // if stamina is empty or the player has not reached the peak of the jump then don't fly
 		{
 			canFly = false;
-			return; // player is out of stamina
 		}
 
+		if (hasJumped && hasPeaked && currentStamina > 0 && !isWallClimbing && !isWallGrabbing && !isWallSliding)
+		{
+			canFly = true;  // Re-enable flying when falling and stamina is available
+		}
+		
+		if (!canFly) return;
 
 		rb.velocity = new Vector2(rb.velocity.x, _flyingSpeed); //add velocity for flying
 		isFlying = true;
+		SetPlayerState(PlayerState.Fly);
 		if (flyingSoundObject == null)
 		{
 			flyingSoundObject = SoundFXManager.Instance.PlayLoopingSoundFXClip(_buzzingFX, transform, 0.25f);
 		}
 
-        TurnOnStaminaBar(); // make stamina bar visible
+		TurnOnStaminaBar(); // make stamina bar visible
 
 		DrainStamina();
 	}
@@ -538,30 +573,112 @@ public class PlayerMovement : MonoBehaviour
 		staminaBarParent.gameObject.SetActive(true);
 	}
 	#endregion
+	
+	#region Falling
+	
+	[Header("Falling Settings")]
+	[SerializeField] private bool isFalling; // Flag indicating if the player is falling
+	[SerializeField] private float timeBeforeFall = 0.2f; // Time before the player is considered to be falling
+	
+	private void Falling()
+	{
+		if (rb.velocity.y < 0 && !isGrounded && !isWallGrabbing && !isWallJumping && !isWallSliding && !isWallClimbing && !isDashing && !isFlying)
+		{
+			timeBeforeFall -= Time.deltaTime;
+			if (timeBeforeFall <= 0)
+			{
+				isFalling = true;
+				SetPlayerState(PlayerState.Fall);
+			}
+		}
+		else
+		{
+			isFalling = false;
+			timeBeforeFall = 0.2f;
+		}
+			
+	}
+	
+	#endregion
+	
 
 		#region Animation
 
 	//animation states    
-	const string PLAYER_WALK_SMALL = "Player Walk Small";
-	const string PLAYER_RUN_SMALL = "Player Run Small";
-	const string PLAYER_WALK = "Player Walk";
-	const string PLAYER_RUN = "Player Run";
-	const string PLAYER_WALK_LARGE = "Player Walk Large";
-	const string PLAYER_RUN_LARGE = "Player Run Large";
-	const string PLAYER_IDLE = "Player Idle";
-	const string PLAYER_RISE = "Player Jump Rising";
-	const string PLAYER_FALL = "Player Jump Falling";
-	const string PLAYER_DASH = "Player Dash";
-	const string PLAYER_ATTACK = "Player Attack";
-	const string PLAYER_WALLSLIDE = "Player WallSlide";
-	const string PLAYER_HURT = "Player Hurt";
-	const string PLAYER_DEATH = "Player Death";
+	public enum PlayerState
+	{
+		Idle,
+		Walk,
+		Run,
+		Jump,
+		DoubleJump,
+		Fall,
+		Hurt,
+		WallJump,
+		WallSlide,
+		WallGrab,
+		WallClimb,
+		Dash,
+		Fly
+	}
 
+	[SerializeField] PlayerState playerState;
 
+	public void SetPlayerState(PlayerState state)
+	{
+		playerState = state;
+		PlayAnimation(playerState);
+	}
 	private bool isDead = false;
 	public bool isHurt = false;
-	private Animator animator;
+	[SerializeField] Animator animator;
 	private string currentState;
+	
+	private void PlayAnimation(PlayerState state)
+	{
+		switch (state)
+		{
+			case PlayerState.Idle:
+				ChangeAnimationState("PlayerIdle");
+				break;
+			case PlayerState.Walk:
+				ChangeAnimationState("PlayerWalk");
+				break;
+			case PlayerState.Run:
+				ChangeAnimationState("PlayerRunning");
+				break;
+			case PlayerState.Jump:
+				ChangeAnimationState("PlayerJump");
+				break;
+			case PlayerState.DoubleJump:
+				ChangeAnimationState("PlayerDoubleJump");
+				break;
+			case PlayerState.Fall:
+				ChangeAnimationState("PlayerFall");
+				break;
+			case PlayerState.Hurt:
+				ChangeAnimationState("TakeDamage");
+				break;
+			case PlayerState.WallJump:
+				ChangeAnimationState("PlayerWallJump");
+				break;
+			case PlayerState.WallSlide:
+				ChangeAnimationState("PlayerWallSlide");
+				break;
+			case PlayerState.WallGrab:
+				ChangeAnimationState("PlayerWallGrab");
+				break;
+			case PlayerState.WallClimb:
+				ChangeAnimationState("PlayerClimb");
+				break;
+			case PlayerState.Dash:
+				ChangeAnimationState("PlayerDash");
+				break;
+			case PlayerState.Fly:
+				ChangeAnimationState("PlayerFly");
+				break;
+		}
+	}
 
 	private void Animations()
 	{
@@ -598,11 +715,11 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 
-    private void AirAnims()
-    {
-        if (isGrounded) return;
-        if (isTouchingWall) return;
-        if (isDashing) return;
+	private void AirAnims()
+	{
+		if (isGrounded) return;
+		if (isTouchingWall) return;
+		if (isDashing) return;
 
 		if (rb.velocity.y > 0)
 		{
@@ -614,31 +731,31 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 
-    private void WallAnims()
-    {
-        if (!isTouchingWall) return;
-        if (isGrounded) return;
-        if (isDashing) return;
+	private void WallAnims()
+	{
+		if (!isTouchingWall) return;
+		if (isGrounded) return;
+		if (isDashing) return;
 
-        if (isWallClimbing)
-        {
-            if (vertical < 0)
-            {
-                // play climb down
-            }
-            else if (vertical > 0)
-            {
-                // play climb up
-            }
-            else
-            {
-                // play wall grab
-            }
-        }
-        else if (isWallSliding)
-        {
-            //ChangeAnimationState(PLAYER_WALLSLIDE);
-        }
+		if (isWallClimbing)
+		{
+			if (vertical < 0)
+			{
+				// play climb down
+			}
+			else if (vertical > 0)
+			{
+				// play climb up
+			}
+			else
+			{
+				// play wall grab
+			}
+		}
+		else if (isWallSliding)
+		{
+			//ChangeAnimationState(PLAYER_WALLSLIDE);
+		}
 
 
 	}
@@ -647,6 +764,7 @@ public class PlayerMovement : MonoBehaviour
 	{
 		//ChangeAnimationState(PLAYER_HURT);
 		isHurt = true;
+		SetPlayerState(PlayerState.Hurt);
 	}
 	public void PlayDeathAnim()
 	{
@@ -675,6 +793,7 @@ public class PlayerMovement : MonoBehaviour
 
 		//reassign the current state
 		currentState = newState;
+		print(currentState);
 	}
 
 	#endregion
